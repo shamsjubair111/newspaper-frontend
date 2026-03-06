@@ -24,6 +24,10 @@ code {
   flex-direction: column;
 }
 
+.App > *:not(nav):not(footer):not(.consent-banner) {
+  flex: 1;
+}
+
 main {
   flex: 1;
   padding: 20px;

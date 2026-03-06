@@ -389,7 +389,7 @@ const ArticleForm = () => {
                 </div>
               ) : (
                 <div className="row">
-                  {articles.slice(0, 6).map(article => (
+                  {articles.slice(0, 7).map(article => (
                     <div className="col-md-6 mb-3" key={article._id}>
                       <div className="card h-100 border">
                         <div className="card-body">
