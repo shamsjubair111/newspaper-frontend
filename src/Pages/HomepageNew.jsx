@@ -137,7 +137,7 @@ const HomePage = () => {
             </div>
 
             {/* Category Sections */}
-            {categories.slice(0, 3).map((category) => {
+            {categories.map((category) => {
               const categoryArticles = getArticlesByCategory(category._id);
               if (categoryArticles.length === 0) return null;
 

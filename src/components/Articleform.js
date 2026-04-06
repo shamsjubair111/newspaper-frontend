@@ -2,6 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 
+// Converts plain text with line breaks into HTML paragraphs.
+// Each blank-line-separated block becomes a <p>. Single line breaks become <br>.
+// If the content already contains HTML tags, it is returned as-is.
+const plainTextToHtml = (text) => {
+  if (!text) return '';
+  // If it already has HTML tags, don't double-convert
+  if (/<[a-z][\s\S]*>/i.test(text)) return text;
+  return text
+    .split(/\n\s*\n/)                          // split on blank lines → paragraphs
+    .map(para => para.trim())
+    .filter(para => para.length > 0)
+    .map(para => `<p>${para.replace(/\n/g, '<br />')}</p>`) // single newlines → <br>
+    .join('\n');
+};
+
 const ArticleForm = () => {
   const navigate = useNavigate();
   const user = authAPI.getCurrentUser();
@@ -117,7 +132,7 @@ const ArticleForm = () => {
       const payload = {
         title: formData.title,
         authorName: formData.authorName,
-        content: formData.content,
+        content: plainTextToHtml(formData.content),
         thumbnail: formData.thumbnail,
         category: formData.category,
         slayout: formData.slayout,
@@ -252,10 +267,10 @@ const ArticleForm = () => {
                     onChange={handleChange}
                     required
                     rows="12"
-                    placeholder="Write your article content here. You can use HTML tags for formatting..."
+                    placeholder="Write your article content here. Separate paragraphs with a blank line. Line breaks are preserved automatically."
                     disabled={loading}
                   />
-                  <div className="form-text">Main article content. Supports HTML formatting.</div>
+                  <div className="form-text">Separate paragraphs with a blank line. Single line breaks become &lt;br&gt;. HTML tags also supported.</div>
                 </div>
 
                 {/* Thumbnail URL */}

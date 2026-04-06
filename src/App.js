@@ -15,6 +15,9 @@ import SubcategoryForm from './components/Subcategoryform';
 import HomePageNew from './Pages/HomepageNew';
 import ArticleDetail from './Pages/ArticleDetail';
 import AdminUsers from './Pages/AdminUsers';
+import AdminArticles from './Pages/AdminArticles';
+import AdminCategories from './Pages/AdminCategories';
+import AdminSubcategories from './Pages/AdminSubcategories';
 import CategoryPage from './Pages/CategoryPage';
 
 function App() {
@@ -27,15 +30,19 @@ function App() {
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/my-comments" element={<MyComments />} />
-          <Route path="/:categoryName" element={<CategoryPage />} />
-          <Route path="/:categoryName/:subcategoryName" element={<CategoryPage />} />
-          <Route path="/create-category" element={<CategoryForm />} />
           <Route path="/my-bookmarks" element={<MyBookmarks />} />
-          <Route path="/create-sub-category" element={<SubcategoryForm />} />
           <Route path="/create-article" element={<ArticleForm />} />
+          <Route path="/create-category" element={<CategoryForm />} />
+          <Route path="/create-sub-category" element={<SubcategoryForm />} />
           <Route path="/create-comment" element={<CommentForm />} />
           <Route path="/article/:id" element={<ArticleDetail />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/articles" element={<AdminArticles />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/subcategories" element={<AdminSubcategories />} />
+          {/* Wildcard category routes — MUST be absolutely last */}
+          <Route path="/:categoryName/:subcategoryName" element={<CategoryPage />} />
+          <Route path="/:categoryName" element={<CategoryPage />} />
         </Routes>
         <Footer />
         <ConsentBanner />

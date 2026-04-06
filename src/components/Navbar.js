@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import './NavigationBar.css';
+import logo from '../assets/logo.png';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const NavigationBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null); // category._id
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const fetchCategoriesAndSubcategories = async () => {
@@ -188,8 +191,7 @@ const NavigationBar = () => {
             {/* Center: Logo */}
             <div className="logo-section mt-4">
               <Link to="/" className="logo-link">
-                <h1 className="logo-main">সমাচার প্রবাহ</h1>
-                <p className="logo-subtitle">সমাজ, সংস্কৃতি ও মুক্তচিন্তার ত্রৈমাসিক</p>
+                <img src={logo} alt="সমাচার প্রবাহ" className="logo-img" />
               </Link>
             </div>
 
@@ -224,17 +226,23 @@ const NavigationBar = () => {
                           </svg>
                           Manage Users
                         </Link></li>
-                        <li><Link className="dropdown-item" to="/create-category">
+                        <li><Link className="dropdown-item" to="/admin/articles">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M12 5v14M5 12h14"/>
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
                           </svg>
-                          Add Category
+                          Manage Articles
                         </Link></li>
-                        <li><Link className="dropdown-item" to="/create-sub-category">
+                        <li><Link className="dropdown-item" to="/admin/categories">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M12 5v14M5 12h14"/>
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
                           </svg>
-                          Add Subcategory
+                          Manage Categories
+                        </Link></li>
+                        <li><Link className="dropdown-item" to="/admin/subcategories">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+                          </svg>
+                          Manage Subcategories
                         </Link></li>
                         <li><hr className="dropdown-divider" /></li>
                       </>
@@ -295,6 +303,7 @@ const NavigationBar = () => {
 
       {/* Desktop Navigation Menu */}
       <nav className="main-nav">
+        <div className="nav-scroll-wrapper">
         <div className="d-flex justify-content-center">
           {loading ? (
             <div className="loading-menu">Loading...</div>
@@ -306,18 +315,34 @@ const NavigationBar = () => {
                   const categorySubs = getSubcategoriesForCategory(category._id);
                   const hasSubs = categorySubs.length > 0;
                   return (
-                    <li key={category._id} className={`nav-item ${hasSubs ? 'has-dropdown' : ''}`}>
+                    <li
+                      key={category._id}
+                      className={`nav-item ${hasSubs ? 'has-dropdown' : ''}`}
+                      onMouseEnter={(e) => {
+                        if (!hasSubs) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setDropdownPos({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+                        setOpenDropdown(category._id);
+                      }}
+                      onMouseLeave={() => setOpenDropdown(null)}
+                    >
                       <Link to={catUrl(category)} style={{ fontWeight: 'bold' }} className="nav-link">
                         {category.name}
                       </Link>
-                      {hasSubs && (
-                        <ul className="dropdown-submenu">
+                      {hasSubs && openDropdown === category._id && (
+                        <ul
+                          className="dropdown-submenu"
+                          style={{ top: dropdownPos.top, left: dropdownPos.left, display: 'block' }}
+                          onMouseEnter={() => setOpenDropdown(category._id)}
+                          onMouseLeave={() => setOpenDropdown(null)}
+                        >
                           {categorySubs.map((sub) => (
                             <li key={sub._id}>
                               <Link
                                 to={subUrl(category, sub)}
                                 style={{ fontWeight: 'bold' }}
                                 className="submenu-link"
+                                onClick={() => setOpenDropdown(null)}
                               >
                                 {sub.name}
                               </Link>
@@ -366,6 +391,7 @@ const NavigationBar = () => {
               )}
             </>
           )}
+        </div>
         </div>
       </nav>
     </header>

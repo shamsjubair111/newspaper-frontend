@@ -52,21 +52,23 @@
   display: inline-block;
 }
 
-.logo-main {
-  font-size: 42px;
-  font-weight: bold;
-  color: #c41e3a;
-  margin: 0;
-  line-height: 1.1;
-  letter-spacing: 0.5px;
+.logo-img {
+  height: 100px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 
-.logo-subtitle {
-  font-size: 16px;
-  color: #666;
-  margin: 2px 0 0 0;
-  font-weight: normal;
-  letter-spacing: 0.3px;
+@media (max-width: 991px) {
+  .logo-img {
+    height: 48px;
+  }
+}
+
+@media (max-width: 576px) {
+  .logo-img {
+    height: 38px;
+  }
 }
 
 /* Auth Section */
@@ -101,10 +103,45 @@
   font-weight: 400;
 }
 
-/* Main Navigation */
+/* ─── Main Navigation ─── */
+/*
+ * KEY: overflow must NOT be set on .main-nav itself — doing so creates a
+ * stacking/scroll context that clips position:absolute dropdown submenus.
+ * Instead, a dedicated .nav-scroll-wrapper handles horizontal scrolling,
+ * and .main-nav stays overflow:visible so dropdowns escape freely.
+ */
 .main-nav {
   border-top: 1px solid #d4c9a3;
   background-color: #fbf6de;
+  overflow: visible;
+}
+
+.nav-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #d4c9a3 #fbf6de;
+}
+
+.nav-scroll-wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.nav-scroll-wrapper::-webkit-scrollbar-track {
+  background: #fbf6de;
+}
+
+.nav-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: #d4c9a3;
+  border-radius: 2px;
+}
+
+/* Inner flex wrapper */
+.main-nav > .nav-scroll-wrapper > div {
+  justify-content: center;
+  min-width: max-content;
+  width: 100%;
 }
 
 .loading-menu {
@@ -117,11 +154,11 @@
 /* Desktop Menu */
 .nav-menu {
   list-style: none;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .nav-item {
@@ -145,15 +182,11 @@
 }
 
 /* Dropdown Submenu */
-.nav-item.has-dropdown:hover .dropdown-submenu {
-  display: block;
-}
+/* dropdown shown via JS on mouseenter/mouseleave */
 
 .dropdown-submenu {
   display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed;
   background: #fbf6de;
   border: 1px solid #d4c9a3;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -161,7 +194,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .dropdown-submenu li {
@@ -280,13 +313,7 @@
     display: block;
   }
 
-  .logo-main {
-    font-size: 32px;
-  }
 
-  .logo-subtitle {
-    font-size: 10px;
-  }
 
   .top-bar-content {
     flex-wrap: wrap;
@@ -308,13 +335,7 @@
 }
 
 @media (max-width: 576px) {
-  .logo-main {
-    font-size: 28px;
-  }
 
-  .logo-subtitle {
-    font-size: 9px;
-  }
 
   .left-icons {
     gap: 10px;
@@ -356,6 +377,7 @@
 .dropdown-divider {
   border-top-color: #d4c9a3;
 }
+
 /* ── Search Overlay ── */
 .search-overlay {
   position: fixed;
