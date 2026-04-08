@@ -1,4 +1,5 @@
 import React from 'react';
+import { LanguageProvider } from './context/LanguageContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -22,6 +23,7 @@ import CategoryPage from './Pages/CategoryPage';
 
 function App() {
   return (
+    <LanguageProvider>
     <Router>
       <div className="App">
         <Navbar />
@@ -48,6 +50,7 @@ function App() {
         <ConsentBanner />
       </div>
     </Router>
+    </LanguageProvider>
   );
 }
 

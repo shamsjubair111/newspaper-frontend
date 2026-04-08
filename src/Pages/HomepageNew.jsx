@@ -1,29 +1,96 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Homepage.css";
+import { useLang } from "../context/LanguageContext";
+import { useT, translations } from "../context/translations";
+import { translateBatch, translateText } from "../context/translate";
 
 const HomePage = () => {
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { lang, filterDate, clearFilter } = useLang();
+  const t = useT(lang);
+  const [translatedTitles, setTranslatedTitles] = useState({});
+  const [translatedExcerpts, setTranslatedExcerpts] = useState({});
+  const [translatedCatNames, setTranslatedCatNames] = useState({});
+
+  // Translate category names
+  useEffect(() => {
+    if (lang === "bn" || categories.length === 0) {
+      setTranslatedCatNames({});
+      return;
+    }
+    translateBatch(categories.map((c) => c.name)).then((names) => {
+      const map = {};
+      categories.forEach((c, i) => {
+        map[c._id] = names[i];
+      });
+      setTranslatedCatNames(map);
+    });
+  }, [lang, categories]);
+
+  const getCatName = (category) =>
+    translatedCatNames[category._id] || category.name;
+
+  // Translate titles
+  useEffect(() => {
+    if (lang === "bn" || articles.length === 0) {
+      setTranslatedTitles({});
+      return;
+    }
+    translateBatch(articles.map((a) => a.title)).then((titles) => {
+      const map = {};
+      articles.forEach((a, i) => {
+        map[a._id] = titles[i];
+      });
+      setTranslatedTitles(map);
+    });
+  }, [lang, articles]);
+
+  // Translate excerpts
+  useEffect(() => {
+    if (lang === "bn" || articles.length === 0) {
+      setTranslatedExcerpts({});
+      return;
+    }
+    const rawExcerpts = articles.map((a) => {
+      const text = (a.content || "").replace(/<[^>]+>/g, "").trim();
+      return text.substring(0, 300);
+    });
+    translateBatch(rawExcerpts).then((excerpts) => {
+      const map = {};
+      articles.forEach((a, i) => {
+        map[a._id] = excerpts[i];
+      });
+      setTranslatedExcerpts(map);
+    });
+  }, [lang, articles]);
+
+  const getTitle = (article) => translatedTitles[article._id] || article.title;
+
+  const getExcerptStr = (article, length = 120) => {
+    if (lang === "en") {
+      if (translatedExcerpts[article._id]) {
+        const ex = translatedExcerpts[article._id];
+        return ex.length > length ? ex.substring(0, length) + "..." : ex;
+      }
+      return "...";
+    }
+    const text = (article.content || "").replace(/<[^>]+>/g, "").trim();
+    return text.length > length ? text.substring(0, length) + "..." : text;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // Fetch articles
-        const articlesResponse = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/articles`,
-        );
-        const articlesData = await articlesResponse.json();
-
-        // Fetch categories for grouping
-        const categoriesResponse = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/categories`,
-        );
-        const categoriesData = await categoriesResponse.json();
-
+        const [articlesRes, categoriesRes] = await Promise.all([
+          fetch(`${process.env.REACT_APP_API_URL}/api/articles`),
+          fetch(`${process.env.REACT_APP_API_URL}/api/categories`),
+        ]);
+        const articlesData = await articlesRes.json();
+        const categoriesData = await categoriesRes.json();
         setArticles(articlesData);
         setCategories(categoriesData);
       } catch (err) {
@@ -32,249 +99,338 @@ const HomePage = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // Get articles by category
-  const getArticlesByCategory = (categoryId) => {
-    return articles.filter(
-      (article) =>
-        article.category?._id === categoryId || article.category === categoryId,
+  // Filter articles by selected date
+  const filteredArticles = filterDate
+    ? articles.filter((a) => {
+        const d = new Date(a.createdAt || a.publishedAt);
+        if (filterDate.day) {
+          return (
+            d.getFullYear() === filterDate.year &&
+            d.getMonth() === filterDate.month &&
+            d.getDate() === filterDate.day
+          );
+        }
+        return (
+          d.getFullYear() === filterDate.year &&
+          d.getMonth() === filterDate.month
+        );
+      })
+    : articles;
+
+  const getArticlesByCategory = (categoryId) =>
+    filteredArticles.filter(
+      (a) => a.category?._id === categoryId || a.category === categoryId,
     );
-  };
 
-  // Format date in Bengali
-  const formatDateBengali = (dateString) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const months = [
-      "জানুয়ারি",
-      "ফেব্রুয়ারি",
-      "মার্চ",
-      "এপ্রিল",
-      "মে",
-      "জুন",
-      "জুলাই",
-      "আগস্ট",
-      "সেপ্টেম্বর",
-      "অক্টোবর",
-      "নভেম্বর",
-      "ডিসেম্বর",
-    ];
-    const bengaliNumerals = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-
-    const day = date
-      .getDate()
-      .toString()
-      .split("")
-      .map((d) => bengaliNumerals[parseInt(d)])
-      .join("");
-    const month = months[date.getMonth()];
-    const year = date
-      .getFullYear()
-      .toString()
-      .split("")
-      .map((d) => bengaliNumerals[parseInt(d)])
-      .join("");
-
-    return `${day} ${month} ${year}`;
-  };
-
-  // Get excerpt from HTML content
-  const getExcerpt = (htmlContent, length = 150) => {
-    const text = htmlContent.replace(/<[^>]*>/g, "");
-    return text.length > length ? text.substring(0, length) + "..." : text;
+    const tr = translations[lang];
+    const month = tr.months[date.getMonth()];
+    if (lang === "en")
+      return `${date.getDate()} ${month} ${date.getFullYear()}`;
+    const toBn = (n) =>
+      n
+        .toString()
+        .split("")
+        .map((d) => tr.numerals[parseInt(d)])
+        .join("");
+    return `${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
   };
 
   if (loading) {
     return (
-      <div className="container py-5 text-center">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
+      <div className="hp-loading">
+        <div className="spinner-border" role="status" />
       </div>
     );
   }
 
+  const hero = filteredArticles[0];
+  const featured = filteredArticles.slice(1, 3);
+  const topGrid = filteredArticles.slice(3, 7);
+  const moreGrid = filteredArticles.slice(7, 13);
+
   return (
-    <div className="homepage">
-      <div className="container">
-        <div className="row g-4 mt-3">
-          {/* Main Content - Left Column */}
-          <div className="col-lg-8">
-            {/* Featured Articles Section */}
-            <div className="featured-section mb-4">
-              <div className="row g-3">
-                {articles.slice(0, 4).map((article, index) => (
-                  <div
-                    key={article._id}
-                    className={index === 0 ? "col-md-6" : "col-md-6"}
-                  >
+    <div className="hp-page">
+      {/* ── Date filter banner ── */}
+      {filterDate && (
+        <div className="hp-filter-banner">
+          <span>
+            {lang === "en" ? "Filtered: " : "ফিল্টার: "}
+            <strong>
+              {filterDate.day
+                ? `${filterDate.day} ${translations[lang].months[filterDate.month]} ${filterDate.year}`
+                : `${translations[lang].months[filterDate.month]} ${filterDate.year}`}
+            </strong>
+            {" — "}
+            {filteredArticles.length}
+            {lang === "en" ? " articles" : " টি নিবন্ধ"}
+          </span>
+          <button className="hp-filter-clear" onClick={clearFilter}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {filterDate && filteredArticles.length === 0 && (
+        <div className="hp-empty">
+          <p>
+            {lang === "en"
+              ? "No articles for this date."
+              : "এই তারিখে কোনো নিবন্ধ নেই।"}
+          </p>
+          <button
+            className="btn btn-outline-secondary btn-sm mt-2"
+            onClick={clearFilter}
+          >
+            {lang === "en" ? "Clear filter" : "ফিল্টার মুছুন"}
+          </button>
+        </div>
+      )}
+
+      {/* ── HERO ── */}
+      {hero && (
+        <div className="hp-hero">
+          <Link to={`/article/${hero._id}`} className="hp-hero-link">
+            {hero.thumbnail && (
+              <div className="hp-hero-img">
+                <img src={hero.thumbnail} alt={getTitle(hero)} />
+                <div className="hp-hero-overlay" />
+              </div>
+            )}
+            <div className="hp-hero-body">
+              {hero.category?.name && (
+                <span className="hp-label">
+                  {getCatName(hero.category) || hero.category.name}
+                </span>
+              )}
+              <h1 className="hp-hero-title">{getTitle(hero)}</h1>
+              <p className="hp-hero-excerpt">{getExcerptStr(hero, 160)}</p>
+              <span className="hp-hero-date">{formatDate(hero.createdAt)}</span>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      <div className="hp-container">
+        {/* ── FEATURED 2-col ── */}
+        {featured.length > 0 && (
+          <div className="hp-featured-row">
+            {featured.map((article) => (
+              <Link
+                key={article._id}
+                to={`/article/${article._id}`}
+                className="hp-featured-card"
+              >
+                {article.thumbnail && (
+                  <div className="hp-card-img">
+                    <img src={article.thumbnail} alt={getTitle(article)} />
+                  </div>
+                )}
+                <div className="hp-card-body">
+                  {article.category?.name && (
+                    <span className="hp-label">
+                      {getCatName(article.category) || article.category.name}
+                    </span>
+                  )}
+                  <h2 className="hp-card-title hp-card-title--lg">
+                    {getTitle(article)}
+                  </h2>
+                  <p className="hp-card-excerpt">
+                    {getExcerptStr(article, 100)}
+                  </p>
+                  <div className="hp-card-meta">
+                    {article.authorName && (
+                      <span className="hp-card-author">
+                        {article.authorName}
+                      </span>
+                    )}
+                    <span className="hp-card-date">
+                      {formatDate(article.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* ── TOP GRID 4-col ── */}
+        {topGrid.length > 0 && (
+          <div className="hp-grid-4">
+            {topGrid.map((article) => (
+              <Link
+                key={article._id}
+                to={`/article/${article._id}`}
+                className="hp-grid-card"
+              >
+                {article.thumbnail && (
+                  <div className="hp-card-img">
+                    <img src={article.thumbnail} alt={getTitle(article)} />
+                  </div>
+                )}
+                <div className="hp-card-body">
+                  {article.category?.name && (
+                    <span className="hp-label">
+                      {getCatName(article.category) || article.category.name}
+                    </span>
+                  )}
+                  <h3 className="hp-card-title">{getTitle(article)}</h3>
+                  <p className="hp-card-excerpt">
+                    {getExcerptStr(article, 80)}
+                  </p>
+                  <div className="hp-card-meta">
+                    {article.authorName && (
+                      <span className="hp-card-author">
+                        {article.authorName}
+                      </span>
+                    )}
+                    <span className="hp-card-date">
+                      {formatDate(article.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* ── CATEGORY SECTIONS ── */}
+        {categories.map((category) => {
+          const catArticles = getArticlesByCategory(category._id);
+          if (catArticles.length === 0) return null;
+
+          const [lead, ...rest] = catArticles;
+
+          return (
+            <div key={category._id} className="hp-cat-section">
+              {/* Category header */}
+              <div className="hp-cat-header">
+                <Link
+                  to={`/${encodeURIComponent(category.name)}`}
+                  className="hp-cat-name"
+                >
+                  {getCatName(category)}
+                </Link>
+              </div>
+
+              <div className="hp-cat-grid">
+                {/* Lead card — bigger */}
+                <Link to={`/article/${lead._id}`} className="hp-cat-lead">
+                  {lead.thumbnail && (
+                    <div className="hp-card-img hp-card-img--tall">
+                      <img src={lead.thumbnail} alt={getTitle(lead)} />
+                    </div>
+                  )}
+                  <div className="hp-card-body">
+                    <h3 className="hp-card-title hp-card-title--md">
+                      {getTitle(lead)}
+                    </h3>
+                    <p className="hp-card-excerpt">
+                      {getExcerptStr(lead, 110)}
+                    </p>
+                    <div className="hp-card-meta">
+                      {lead.authorName && (
+                        <span className="hp-card-author">
+                          {lead.authorName}
+                        </span>
+                      )}
+                      <span className="hp-card-date">
+                        {formatDate(lead.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Rest as small cards */}
+                <div className="hp-cat-rest">
+                  {rest.slice(0, 3).map((article) => (
                     <Link
+                      key={article._id}
                       to={`/article/${article._id}`}
-                      className="article-card featured-card"
+                      className="hp-cat-small"
                     >
                       {article.thumbnail && (
-                        <div className="article-image">
-                          <img src={article.thumbnail} alt={article.title} />
+                        <div className="hp-cat-small-img">
+                          <img
+                            src={article.thumbnail}
+                            alt={getTitle(article)}
+                          />
                         </div>
                       )}
-                      <div className="article-content">
-                        <h3 className="article-title">{article.title}</h3>
-                        {article.summary && (
-                          <p className="article-excerpt">{article.summary}</p>
-                        )}
-                        <div className="article-meta">
-                          <span className="article-date">
-                            {formatDateBengali(article.createdAt)}
+                      <div className="hp-card-body">
+                        <h4 className="hp-card-title hp-card-title--sm">
+                          {getTitle(article)}
+                        </h4>
+                        <p className="hp-card-excerpt hp-card-excerpt--xs">
+                          {getExcerptStr(article, 60)}
+                        </p>
+                        <div className="hp-card-meta">
+                          {article.authorName && (
+                            <span className="hp-card-author">
+                              {article.authorName}
+                            </span>
+                          )}
+                          <span className="hp-card-date">
+                            {formatDate(article.createdAt)}
                           </span>
                         </div>
                       </div>
                     </Link>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
+          );
+        })}
 
-            {/* Category Sections */}
-            {categories.map((category) => {
-              const categoryArticles = getArticlesByCategory(category._id);
-              if (categoryArticles.length === 0) return null;
-
-              return (
-                <div key={category._id} className="category-section mb-4">
-                  <div className="category-header">
-                    <h2 className="category-title">{category.name}</h2>
-                  </div>
-
-                  <div className="row g-3">
-                    {/* First article with image */}
-                    {categoryArticles[0] && (
-                      <div className="col-md-6">
-                        <Link
-                          to={`/article/${categoryArticles[0]._id}`}
-                          className="article-card medium-card"
-                        >
-                          {categoryArticles[0].thumbnail && (
-                            <div className="article-image">
-                              <img
-                                src={categoryArticles[0].thumbnail}
-                                alt={categoryArticles[0].title}
-                              />
-                            </div>
-                          )}
-                          <div className="article-content">
-                            <h4 className="article-title">
-                              {categoryArticles[0].title}
-                            </h4>
-                            <p className="article-excerpt">
-                              {getExcerpt(categoryArticles[0].content, 120)}
-                            </p>
-                            <span className="article-date">
-                              {formatDateBengali(categoryArticles[0].createdAt)}
-                            </span>
-                          </div>
-                        </Link>
-                      </div>
-                    )}
-
-                    {/* List of other articles */}
-                    <div className="col-md-6">
-                      <div className="article-list">
-                        {categoryArticles.slice(1, 4).map((article) => (
-                          <Link
-                            key={article._id}
-                            to={`/article/${article._id}`}
-                            className="article-list-item"
-                          >
-                            <h5 className="list-article-title">
-                              {article.title}
-                            </h5>
-                            <p className="list-article-excerpt">
-                              {getExcerpt(article.content, 80)}
-                            </p>
-                            <span className="article-date">
-                              {formatDateBengali(article.createdAt)}
-                            </span>
-                          </Link>
-                        ))}
-                      </div>
+        {/* ── MORE ARTICLES 3-col ── */}
+        {moreGrid.length > 0 && (
+          <div className="hp-more-section">
+            <div className="hp-section-header">
+              <span className="hp-section-title">{t("readMore")}</span>
+            </div>
+            <div className="hp-grid-3">
+              {moreGrid.map((article) => (
+                <Link
+                  key={article._id}
+                  to={`/article/${article._id}`}
+                  className="hp-grid-card"
+                >
+                  {article.thumbnail && (
+                    <div className="hp-card-img">
+                      <img src={article.thumbnail} alt={getTitle(article)} />
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Sidebar - Right Column */}
-          <div className="col-lg-4">
-            {/* Sidebar Articles */}
-            <div className="sidebar-section">
-              <div className="sidebar-header">
-                <h3 className="sidebar-title">সাম্প্রতিক</h3>
-              </div>
-
-              <div className="sidebar-articles">
-                {articles.slice(4, 10).map((article) => (
-                  <Link
-                    key={article._id}
-                    to={`/article/${article._id}`}
-                    className="sidebar-article"
-                  >
-                    {article.thumbnail && (
-                      <div className="sidebar-image">
-                        <img src={article.thumbnail} alt={article.title} />
-                      </div>
+                  )}
+                  <div className="hp-card-body">
+                    {article.category?.name && (
+                      <span className="hp-label">
+                        {getCatName(article.category) || article.category.name}
+                      </span>
                     )}
-                    <div className="sidebar-content">
-                      <h5 className="sidebar-article-title">{article.title}</h5>
-                      <p className="sidebar-excerpt">
-                        {getExcerpt(article.content, 60)}
-                      </p>
-                      <span className="article-date">
-                        {formatDateBengali(article.createdAt)}
+                    <h3 className="hp-card-title">{getTitle(article)}</h3>
+                    <p className="hp-card-excerpt">
+                      {getExcerptStr(article, 80)}
+                    </p>
+                    <div className="hp-card-meta">
+                      {article.authorName && (
+                        <span className="hp-card-author">
+                          {article.authorName}
+                        </span>
+                      )}
+                      <span className="hp-card-date">
+                        {formatDate(article.createdAt)}
                       </span>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Ad Placeholder */}
-            <div className="ad-section mt-4">
-              <div className="ad-placeholder">
-                <p className="text-center text-muted">Advertisement</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* More Articles Section */}
-        <div className="row g-3 mt-4">
-          <div className="col-12">
-            <h2 className="section-title">আরও পড়ুন</h2>
-          </div>
-          {articles.slice(10, 16).map((article) => (
-            <div key={article._id} className="col-md-4">
-              <Link
-                to={`/article/${article._id}`}
-                className="article-card small-card"
-              >
-                {article.thumbnail && (
-                  <div className="article-image">
-                    <img src={article.thumbnail} alt={article.title} />
                   </div>
-                )}
-                <div className="article-content">
-                  <h4 className="article-title">{article.title}</h4>
-                  <span className="article-date">
-                    {formatDateBengali(article.createdAt)}
-                  </span>
-                </div>
-              </Link>
+                </Link>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

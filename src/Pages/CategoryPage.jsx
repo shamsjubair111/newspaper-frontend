@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useLang } from "../context/LanguageContext";
+import { useT, translations } from "../context/translations";
+import { translateBatch, translateText } from "../context/translate";
 
 const CategoryPage = () => {
   const { categoryName, subcategoryName } = useParams();
@@ -7,14 +10,18 @@ const CategoryPage = () => {
   const [category, setCategory] = useState(null);
   const [subcategory, setSubcategory] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const { lang } = useLang();
+  const t = useT(lang);
+  const [translatedTitles, setTranslatedTitles] = useState({});
+  const [translatedPageTitle, setTranslatedPageTitle] = useState("");
+  const [translatedCatName, setTranslatedCatName] = useState("");
 
   useEffect(() => {
     fetchData();
   }, [categoryName, subcategoryName]);
 
-  // decode URL encoding e.g. %E0%A6%B0%E0%A6%BE → রা
-  const decode = (str) => decodeURIComponent(str || '');
+  const decode = (str) => decodeURIComponent(str || "");
 
   const fetchData = async () => {
     try {
@@ -23,35 +30,32 @@ const CategoryPage = () => {
       const decodedCat = decode(categoryName);
       const decodedSub = decode(subcategoryName);
 
-      // Fetch all categories, match by name
       const catRes = await fetch(`${API}/api/categories`);
       const allCats = await catRes.json();
-      const matchedCat = allCats.find(c => c.name === decodedCat);
-      if (!matchedCat) throw new Error(`"${decodedCat}" নামে কোনো বিভাগ নেই`);
+      const matchedCat = allCats.find((c) => c.name === decodedCat);
+      if (!matchedCat) throw new Error(`Category "${decodedCat}" not found`);
       setCategory(matchedCat);
 
-      // Match subcategory by name if present
       let matchedSub = null;
       if (subcategoryName) {
         const subRes = await fetch(`${API}/api/subcategories`);
         const allSubs = await subRes.json();
-        matchedSub = allSubs.find(s =>
-          s.name === decodedSub &&
-          (s.category?._id === matchedCat._id || s.category === matchedCat._id)
+        matchedSub = allSubs.find(
+          (s) =>
+            s.name === decodedSub &&
+            (s.category?._id === matchedCat._id ||
+              s.category === matchedCat._id),
         );
         setSubcategory(matchedSub || null);
       } else {
         setSubcategory(null);
       }
 
-      // Fetch and filter articles
       const artRes = await fetch(`${API}/api/articles`);
       const allArts = await artRes.json();
-
-      const filtered = allArts.filter(a => {
+      const filtered = allArts.filter((a) => {
         const catMatch =
-          a.category?._id === matchedCat._id ||
-          a.category === matchedCat._id;
+          a.category?._id === matchedCat._id || a.category === matchedCat._id;
         if (matchedSub) {
           const subMatch =
             a.subcategory?._id === matchedSub._id ||
@@ -60,7 +64,8 @@ const CategoryPage = () => {
         }
         return catMatch;
       });
-
+      // Sort newest first
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setArticles(filtered);
     } catch (err) {
       setError(err.message);
@@ -69,123 +74,193 @@ const CategoryPage = () => {
     }
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric'
-  });
+  // Translate names
+  useEffect(() => {
+    if (lang === "bn") {
+      setTranslatedPageTitle("");
+      setTranslatedCatName("");
+      return;
+    }
+    if (category?.name) translateText(category.name).then(setTranslatedCatName);
+    const pageName = subcategory ? subcategory.name : category?.name;
+    if (pageName) translateText(pageName).then(setTranslatedPageTitle);
+  }, [lang, category, subcategory]);
 
-  if (loading) return (
-    <div className="container py-5 text-center">
-      <div className="spinner-border text-primary" role="status" />
-    </div>
-  );
+  // Translate titles
+  useEffect(() => {
+    if (lang === "bn" || articles.length === 0) {
+      setTranslatedTitles({});
+      return;
+    }
+    translateBatch(articles.map((a) => a.title)).then((titles) => {
+      const map = {};
+      articles.forEach((a, i) => {
+        map[a._id] = titles[i];
+      });
+      setTranslatedTitles(map);
+    });
+  }, [lang, articles]);
 
-  if (error) return (
-    <div className="container py-5 text-center">
-      <h2 className="text-danger mb-3">{error}</h2>
-      <Link to="/" className="btn btn-primary">হোমে ফিরুন</Link>
-    </div>
-  );
+  const getTitle = (article) => translatedTitles[article._id] || article.title;
 
-  const pageTitle = subcategory ? subcategory.name : category?.name;
+  const getExcerpt = (article, length = 120) => {
+    const text = (article.content || "").replace(/<[^>]+>/g, "").trim();
+    return text.length > length ? text.substring(0, length) + "..." : text;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const tr = translations[lang];
+    const month = tr.months[date.getMonth()];
+    if (lang === "en")
+      return `${date.getDate()} ${month} ${date.getFullYear()}`;
+    const toBn = (n) =>
+      n
+        .toString()
+        .split("")
+        .map((d) => tr.numerals[parseInt(d)])
+        .join("");
+    return `${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
+  };
+
+  if (loading)
+    return (
+      <div className="cp-page">
+        <div className="cp-loading">
+          <div className="spinner-border" role="status" />
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="cp-page">
+        <div className="cp-error">
+          <p>{error}</p>
+          <Link to="/" className="cp-back-btn">
+            {t("backHome")}
+          </Link>
+        </div>
+      </div>
+    );
+
+  const pageTitle =
+    lang === "en" && translatedPageTitle
+      ? translatedPageTitle
+      : subcategory
+        ? subcategory.name
+        : category?.name;
+
+  const displayCatName = (lang === "en" && translatedCatName) || category?.name;
+
+  const hero = articles[0];
+  const grid = articles.slice(1);
 
   return (
-    <div className="container py-4">
+    <div className="cp-page">
+      {/* ── Header ── */}
+      <div className="cp-header">
+        <div className="cp-header-inner">
+          {/* Breadcrumb */}
+          <nav className="cp-breadcrumb">
+            <Link to="/" className="cp-breadcrumb-link">
+              {t("breadcrumbHome")}
+            </Link>
+            {category && (
+              <>
+                <span className="cp-breadcrumb-sep">/</span>
+                <Link
+                  to={`/${encodeURIComponent(category.name)}`}
+                  className="cp-breadcrumb-link"
+                >
+                  {displayCatName}
+                </Link>
+              </>
+            )}
+            {subcategory && (
+              <>
+                <span className="cp-breadcrumb-sep">/</span>
+                <span className="cp-breadcrumb-current">{pageTitle}</span>
+              </>
+            )}
+          </nav>
 
-      {/* Breadcrumb + Header */}
-      <div className="border-bottom pb-3 mb-4">
-        <nav className="mb-2" style={{ fontSize: '13px' }}>
-          <Link to="/" style={{ color: '#1a56a0', textDecoration: 'none' }}>সমাচার প্রবাহ</Link>
-          {category && (
-            <>
-              <span className="text-muted mx-2">/</span>
-              <Link
-                to={`/${encodeURIComponent(category.name)}`}
-                style={{ color: '#1a56a0', textDecoration: 'none' }}
-              >
-                {category.name}
-              </Link>
-            </>
-          )}
-          {subcategory && (
-            <>
-              <span className="text-muted mx-2">/</span>
-              <span className="text-muted">{subcategory.name}</span>
-            </>
-          )}
-        </nav>
-        <h2 className="mb-0 fw-bold" style={{ fontFamily: 'SolaimanLipi, Noto Sans Bengali, Arial, sans-serif' }}>
-          {pageTitle}
-        </h2>
-        <p className="text-muted mt-1 mb-0">{articles.length} টি নিবন্ধ</p>
+          {/* Title */}
+          <h1 className="cp-title">{pageTitle}</h1>
+          <p className="cp-count">{t("articlesCount", articles.length)}</p>
+        </div>
       </div>
 
-      {/* Articles */}
-      {articles.length === 0 ? (
-        <div className="text-center py-5">
-          <p className="text-muted fs-5">এই বিভাগে কোনো নিবন্ধ নেই।</p>
-          <Link to="/" className="btn btn-primary mt-2">হোমে ফিরুন</Link>
+      {/* ── No articles ── */}
+      {articles.length === 0 && (
+        <div className="cp-empty">
+          <p>{t("noArticles")}</p>
+          <Link to="/" className="cp-back-btn">
+            {t("backHome")}
+          </Link>
         </div>
-      ) : (
-        <div className="row g-4">
-          {articles.map((article, index) => (
-            index === 0 ? (
-              <div className="col-12" key={article._id}>
-                <Link to={`/article/${article._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div className="card border-0 shadow-sm overflow-hidden" style={{ borderRadius: '8px' }}>
-                    <div className="row g-0">
-                      {article.thumbnail && (
-                        <div className="col-md-6">
-                          <img
-                            src={article.thumbnail}
-                            alt={article.title}
-                            style={{ width: '100%', height: '280px', objectFit: 'cover' }}
-                          />
-                        </div>
-                      )}
-                      <div className={`col-md-${article.thumbnail ? '6' : '12'} d-flex align-items-center`}>
-                        <div className="card-body p-4">
-                          <span className="badge bg-primary mb-2">{pageTitle}</span>
-                          <h3 className="card-title fw-bold mb-2"
-                            style={{ fontFamily: 'SolaimanLipi, Noto Sans Bengali, Arial, sans-serif' }}>
-                            {article.title}
-                          </h3>
-                          {article.authorName && (
-                            <p className="text-muted small mb-2">লেখক: {article.authorName}</p>
-                          )}
-                          <p className="text-muted small">{formatDate(article.createdAt)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+      )}
+
+      {/* ── Hero article ── */}
+      {hero && (
+        <div className="cp-hero">
+          <Link to={`/article/${hero._id}`} className="cp-hero-link">
+            {hero.thumbnail && (
+              <div className="cp-hero-img">
+                <img src={hero.thumbnail} alt={getTitle(hero)} />
+                <div className="cp-hero-overlay" />
               </div>
-            ) : (
-              <div className="col-md-4 col-sm-6" key={article._id}>
-                <Link to={`/article/${article._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div className="card h-100 border-0 shadow-sm" style={{ borderRadius: '8px', overflow: 'hidden' }}>
-                    {article.thumbnail && (
-                      <img
-                        src={article.thumbnail}
-                        alt={article.title}
-                        className="card-img-top"
-                        style={{ height: '180px', objectFit: 'cover' }}
-                      />
+            )}
+            <div className="cp-hero-body">
+              <span className="cp-label">{pageTitle}</span>
+              <h2 className="cp-hero-title">{getTitle(hero)}</h2>
+              <p className="cp-hero-excerpt">{getExcerpt(hero, 200)}</p>
+              <div className="cp-hero-meta">
+                {hero.authorName && (
+                  <span className="cp-hero-author">{hero.authorName}</span>
+                )}
+                <span className="cp-hero-date">
+                  {formatDate(hero.createdAt)}
+                </span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      {/* ── Article grid ── */}
+      {grid.length > 0 && (
+        <div className="cp-container">
+          <div className="cp-grid">
+            {grid.map((article) => (
+              <Link
+                key={article._id}
+                to={`/article/${article._id}`}
+                className="cp-card"
+              >
+                {article.thumbnail && (
+                  <div className="cp-card-img">
+                    <img src={article.thumbnail} alt={getTitle(article)} />
+                  </div>
+                )}
+                <div className="cp-card-body">
+                  <span className="cp-label">{pageTitle}</span>
+                  <h3 className="cp-card-title">{getTitle(article)}</h3>
+                  <p className="cp-card-excerpt">{getExcerpt(article, 100)}</p>
+                  <div className="cp-card-meta">
+                    {article.authorName && (
+                      <span className="cp-card-author">
+                        {article.authorName}
+                      </span>
                     )}
-                    <div className="card-body">
-                      <h6 className="card-title fw-bold"
-                        style={{ fontFamily: 'SolaimanLipi, Noto Sans Bengali, Arial, sans-serif' }}>
-                        {article.title}
-                      </h6>
-                      {article.authorName && (
-                        <p className="text-muted small mb-1">লেখক: {article.authorName}</p>
-                      )}
-                      <p className="text-muted small mb-0">{formatDate(article.createdAt)}</p>
-                    </div>
+                    <span className="cp-card-date">
+                      {formatDate(article.createdAt)}
+                    </span>
                   </div>
-                </Link>
-              </div>
-            )
-          ))}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>

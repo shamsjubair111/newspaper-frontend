@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './ConsentBanner.css';
+import { useLang } from '../context/LanguageContext';
+import { useT } from '../context/translations';
 
 const ConsentBanner = () => {
   const [visible, setVisible] = useState(false);
+  const { lang } = useLang();
+  const t = useT(lang);
 
   useEffect(() => {
     const consent = localStorage.getItem('privacy_consent');
@@ -24,8 +28,8 @@ const ConsentBanner = () => {
   return (
     <div className="consent-banner">
       <p className="consent-text">
-        By using this site, you agree to our{' '}
-        <Link to="/privacy" className="consent-link">Privacy Policy</Link>.
+        {t('consentText')}{' '}
+        <Link to="/privacy" className="consent-link">{t('consentPrivacy')}</Link>.
       </p>
       <button className="consent-btn" onClick={handleAccept}>
         OK

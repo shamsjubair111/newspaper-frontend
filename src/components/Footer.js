@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
+import { useLang } from '../context/LanguageContext';
+import { useT } from '../context/translations';
 
 const Footer = () => {
+  const { lang } = useLang();
+  const t = useT(lang);
   return (
     <footer className="footer">
       <div className="footer-main">
@@ -18,7 +22,7 @@ const Footer = () => {
                   <span className="footer-logo-sub">প্রবাহ</span>
                 </div>
               </Link>
-              <p className="footer-tagline">সত্য, বস্তুনিষ্ঠ ও মানসম্পন্ন সংবাদের উৎস</p>
+              <p className="footer-tagline">{t('footerTagline')}</p>
               <div className="footer-social">
                 <a href="https://facebook.com" target="_blank" rel="noreferrer" className="footer-social-btn footer-fb" aria-label="Facebook">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
@@ -35,41 +39,41 @@ const Footer = () => {
 
             {/* Column 1 */}
             <div className="footer-col">
-              <h4 className="footer-col-title">বিভাগ</h4>
+              <h4 className="footer-col-title">{t('footerCategories')}</h4>
               <ul className="footer-links">
-                <li><Link to="/প্রবন্ধ">প্রবন্ধ</Link></li>
-                <li><Link to="/%E0%A6%AC%E0%A6%BF%E0%A6%B6%E0%A7%87%E0%A6%B7%20%E0%A6%B8%E0%A7%8D%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A7%8D%E0%A6%B7%E0%A6%BE%E0%A7%8E%E0%A6%95%E0%A6%BE%E0%A6%B0">সাক্ষাৎকার</Link></li>
-                <li><Link to="/%E0%A6%85%E0%A6%A8%E0%A7%81%E0%A6%AC%E0%A6%BE%E0%A6%A6">অনুবাদ</Link></li>
-                <li><Link to="/%E0%A6%AC%E0%A7%81%E0%A6%95%20%E0%A6%B0%E0%A6%BF%E0%A6%AD%E0%A6%BF%E0%A6%89">বই আলোচনা</Link></li>
-                <li><Link to="/%E0%A6%B0%E0%A6%BE%E0%A6%9C%E0%A6%A8%E0%A7%80%E0%A6%A4%E0%A6%BF">নিবন্ধ</Link></li>
+                <li><Link to="/প্রবন্ধ">{t('footerLinkProbandhya')}</Link></li>
+                <li><Link to="/%E0%A6%AC%E0%A6%BF%E0%A6%B6%E0%A7%87%E0%A6%B7%20%E0%A6%B8%E0%A7%8D%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A7%8D%E0%A6%B7%E0%A6%BE%E0%A7%8E%E0%A6%95%E0%A6%BE%E0%A6%B0">{t('footerLinkInterview')}</Link></li>
+                <li><Link to="/%E0%A6%85%E0%A6%A8%E0%A7%81%E0%A6%AC%E0%A6%BE%E0%A6%A6">{t('footerLinkTranslation')}</Link></li>
+                <li><Link to="/%E0%A6%AC%E0%A7%81%E0%A6%95%20%E0%A6%B0%E0%A6%BF%E0%A6%AD%E0%A6%BF%E0%A6%89">{t('footerLinkBookReview')}</Link></li>
+                <li><Link to="/%E0%A6%B0%E0%A6%BE%E0%A6%9C%E0%A6%A8%E0%A7%80%E0%A6%A4%E0%A6%BF">{t('footerLinkNibandha')}</Link></li>
               </ul>
             </div>
 
             {/* Column 2 */}
             <div className="footer-col">
-              <h4 className="footer-col-title">তথ্য</h4>
+              <h4 className="footer-col-title">{t('footerInfo')}</h4>
               <ul className="footer-links">
-                <li><Link to="/archive">আর্কাইভ</Link></li>
-                <li><Link to="/about">সমাচার প্রবাহ সম্পর্কে</Link></li>
-                <li><Link to="/submission">লেখা পাঠানোর নিয়ম</Link></li>
-                <li><Link to="/contact">যোগাযোগ</Link></li>
-                <li><Link to="/privacy">গোপনীয়তা নীতি</Link></li>
+                <li><Link to="/archive">{t('footerLinkArchive')}</Link></li>
+                <li><Link to="/about">{t('footerLinkAbout')}</Link></li>
+                <li><Link to="/submission">{t('footerLinkSubmission')}</Link></li>
+                <li><Link to="/contact">{t('footerLinkContact')}</Link></li>
+                <li><Link to="/privacy">{t('footerLinkPrivacy')}</Link></li>
               </ul>
             </div>
 
             {/* Contact */}
             <div className="footer-col">
-              <h4 className="footer-col-title">যোগাযোগ</h4>
+              <h4 className="footer-col-title">{t('footerContact')}</h4>
               <div className="footer-contact">
-                <p className="footer-contact-name">সমাচার প্রবাহ</p>
-                <p>প্রগতি ইন্স্যুরেন্স ভবন</p>
-                <p>২০-২১ কারওয়ান বাজার, ঢাকা ১২১৫</p>
-                <p>ফোন: ০১১৬০০৭৬-৮১</p>
-                <p>ইমেইল: <a href="mailto:info@samacharprabhah.com">info@samacharprabhah.com</a></p>
+                <p className="footer-contact-name">{t('footerContactName')}</p>
+                <p>{t('footerAddress')}</p>
+                <p>{t('footerCity')}</p>
+                <p>{t('footerPhone')}</p>
+                <p>{t('footerEmail')}<a href="mailto:info@samacharprabhah.com">info@samacharprabhah.com</a></p>
                 <div className="footer-staff">
-                  <p><strong>সম্পাদক ও প্রকাশক:</strong> মতিউর রহমান</p>
-                  <p><strong>নির্বাহী সম্পাদক:</strong> মোহাম্মদ সাজ্জাদুর রহমান</p>
-                  <p><strong>সহযোগী সম্পাদক:</strong> হালিলুল্লাহ</p>
+                  <p><strong>{t('footerEditor')}</strong>{t('footerEditorName')}</p>
+                  <p><strong>{t('footerExecEditor')}</strong>{t('footerExecEditorName')}</p>
+                  <p><strong>{t('footerAssocEditor')}</strong>{t('footerAssocEditorName')}</p>
                 </div>
               </div>
             </div>
@@ -81,7 +85,7 @@ const Footer = () => {
       {/* Bottom bar */}
       <div className="footer-bottom">
         <div className="container">
-          <p>© {new Date().getFullYear()} সমাচার প্রবাহ। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>{t('footerCopyright', new Date().getFullYear())}</p>
         </div>
       </div>
     </footer>

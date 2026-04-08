@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import { useLang } from '../context/LanguageContext';
+import { useT, translations } from '../context/translations';
+import { translateText, translateHtml } from '../context/translate';
 import './ArticleDetail.css';
 
 const ArticleDetail = () => {
@@ -19,6 +22,10 @@ const ArticleDetail = () => {
   const [commentError, setCommentError] = useState('');
   const [commentSuccess, setCommentSuccess] = useState('');
   const currentUser = authAPI.getCurrentUser();
+  const { lang } = useLang();
+  const t = useT(lang);
+  const [translatedArticle, setTranslatedArticle] = useState(null);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -36,6 +43,7 @@ const ArticleDetail = () => {
     };
     fetchArticle();
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -52,6 +60,33 @@ const ArticleDetail = () => {
     };
     checkBookmark();
   }, [id, currentUser]);
+
+  // Translate article when language switches to English
+  useEffect(() => {
+    if (lang === 'bn' || !article) {
+      setTranslatedArticle(null);
+      return;
+    }
+    const doTranslate = async () => {
+      setTranslating(true);
+      try {
+        const [title, authorName, content] = await Promise.all([
+          translateText(article.title),
+          article.authorName ? translateText(article.authorName) : Promise.resolve(''),
+          translateHtml(article.content),
+        ]);
+        setTranslatedArticle({ ...article, title, authorName, content });
+      } catch {
+        setTranslatedArticle(null);
+      } finally {
+        setTranslating(false);
+      }
+    };
+    doTranslate();
+  }, [lang, article]);
+
+  // Use translated version if available
+  const displayArticle = (lang === 'en' && translatedArticle) ? translatedArticle : article;
 
   const fetchComments = async () => {
     try {
@@ -80,7 +115,7 @@ const ArticleDetail = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to post comment');
       setCommentText('');
-      setCommentSuccess('মন্তব্য পোস্ট হয়েছে!');
+      setCommentSuccess(t('commentSuccess'));
       setTimeout(() => setCommentSuccess(''), 3000);
       fetchComments();
     } catch (err) {
@@ -120,12 +155,17 @@ const ArticleDetail = () => {
     }
   };
 
-  const formatDateTimeBengali = (dateString) => {
+  const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-    const bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-    const toBn = (n) => n.toString().split('').map(d => bn[parseInt(d)]).join('');
-    return `আপডেট: ${toBn(date.getDate())} ${months[date.getMonth()]} ${toBn(date.getFullYear())}, ${toBn(date.getHours()).padStart(2,'০')}: ${toBn(date.getMinutes()).padStart(2,'০')}`;
+    const tr = translations[lang];
+    const month = tr.months[date.getMonth()];
+    if (lang === 'en') {
+      const h = date.getHours().toString().padStart(2,'0');
+      const m = date.getMinutes().toString().padStart(2,'0');
+      return `${t('datePrefix')}${date.getDate()} ${month} ${date.getFullYear()}, ${h}:${m}`;
+    }
+    const toBn = (n) => n.toString().split('').map(d => tr.numerals[parseInt(d)]).join('');
+    return `${t('datePrefix')}${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}, ${toBn(date.getHours()).padStart(2,'০')}:${toBn(date.getMinutes()).padStart(2,'০')}`;
   };
 
   const formatCommentDate = (dateString) => {
@@ -176,7 +216,7 @@ const ArticleDetail = () => {
 
         {/* Breadcrumb */}
         <div className="ad-breadcrumb">
-          <Link to="/" className="ad-breadcrumb-link">সমাচার প্রবাহ</Link>
+          <Link to="/" className="ad-breadcrumb-link">{t('breadcrumbHome')}</Link>
           {article.category?.name && (
             <>
               <span className="ad-breadcrumb-sep"> / </span>
@@ -187,9 +227,9 @@ const ArticleDetail = () => {
           )}
         </div>
 
-        {article.authorName && <div className="ad-author-top">{article.authorName}</div>}
+        {displayArticle?.authorName && <div className="ad-author-top">{displayArticle.authorName}</div>}
 
-        <h1 className="ad-title">{article.title}</h1>
+        <h1 className="ad-title">{displayArticle?.title || article.title}</h1>
         <div className="ad-title-divider" />
 
         {bookmarkMsg && (
@@ -200,8 +240,8 @@ const ArticleDetail = () => {
 
         <div className="ad-meta-row">
           <div className="ad-meta-left">
-            {article.authorName && <span className="ad-meta-author">{article.authorName}</span>}
-            <span className="ad-meta-date">{formatDateTimeBengali(article.updatedAt || article.createdAt)}</span>
+            {displayArticle?.authorName && <span className="ad-meta-author">{displayArticle.authorName}</span>}
+            <span className="ad-meta-date">{formatDateTime(article.updatedAt || article.createdAt)}</span>
           </div>
           <div className="ad-share-icons">
             <button className="ad-share-btn ad-share-facebook" onClick={() => handleShare('facebook')} title="Facebook">
@@ -241,11 +281,21 @@ const ArticleDetail = () => {
 
         {article.thumbnail && (
           <div className="ad-thumbnail-wrapper">
-            <img src={article.thumbnail} alt={article.title} className="ad-thumbnail" />
+            <img src={article.thumbnail} alt={displayArticle?.title || article.title} className="ad-thumbnail" />
           </div>
         )}
 
-        <div className="ad-body" style={{ fontSize: `${fontSize}px` }} dangerouslySetInnerHTML={{ __html: article.content }} />
+        {lang === 'en' && translating && (
+          <div className="text-center py-4">
+            <div className="spinner-border spinner-border-sm text-secondary me-2" role="status" />
+            <span className="text-muted small">Translating content...</span>
+          </div>
+        )}
+        <div
+          className="ad-body"
+          style={{ fontSize: `${fontSize}px`, opacity: (lang === 'en' && translating) ? 0.3 : 1, transition: 'opacity 0.3s' }}
+          dangerouslySetInnerHTML={{ __html: displayArticle?.content || article.content }}
+        />
 
         <div className="ad-tags">
           {article.category?.name && (
@@ -267,7 +317,7 @@ const ArticleDetail = () => {
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                 </svg>
               </span>
-              <h3 className="cmt-title">মন্তব্য</h3>
+              <h3 className="cmt-title">{t('commentsTitle')}</h3>
               <span className="cmt-count">{comments.length}</span>
             </div>
           </div>
@@ -286,26 +336,26 @@ const ArticleDetail = () => {
                   <textarea
                     className="cmt-textarea"
                     rows="3"
-                    placeholder="আপনার মন্তব্য লিখুন..."
+                    placeholder={t('commentPlaceholder')}
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     disabled={commentLoading}
                   />
                   <div className="cmt-form-footer">
-                    <span className="cmt-char-count">{commentText.length} অক্ষর</span>
+                    <span className="cmt-char-count">{t('charCount', commentText.length)}</span>
                     <button
                       type="submit"
                       className="cmt-submit-btn"
                       disabled={commentLoading || !commentText.trim()}
                     >
                       {commentLoading ? (
-                        <><span className="cmt-spinner" /> পোস্ট হচ্ছে...</>
+                        <><span className="cmt-spinner" /> {t('commentPosting')}</>
                       ) : (
                         <>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                           </svg>
-                          পোস্ট করুন
+                          {t('commentPost')}
                         </>
                       )}
                     </button>
@@ -317,7 +367,7 @@ const ArticleDetail = () => {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.5">
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                 </svg>
-                <p>মন্তব্য করতে <Link to="/login" className="cmt-login-link">লগইন করুন</Link></p>
+                <p>{t('commentLoginPrompt')} <Link to="/login" className="cmt-login-link">{t('commentLoginLink')}</Link></p>
               </div>
             )}
           </div>
@@ -329,7 +379,7 @@ const ArticleDetail = () => {
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" strokeWidth="1">
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                 </svg>
-                <p>এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্য করুন!</p>
+                <p>{t('commentEmpty')}</p>
               </div>
             ) : (
               comments.map((comment, index) => (
