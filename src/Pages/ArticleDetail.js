@@ -197,6 +197,18 @@ const ArticleDetail = () => {
 
   const handlePrint = () => window.print();
 
+  // Extract YouTube ID from URL
+  const extractYouTubeId = (url) => {
+    if (!url) return '';
+    const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : '';
+  };
+
+  // Determine if article has a valid video
+  const hasVideo = article?.videoUrl && article.videoUrl.trim() !== '';
+  const isYouTube = hasVideo && (article.videoUrl.includes('youtube') || article.videoUrl.includes('youtu.be'));
+  const youTubeId = isYouTube ? extractYouTubeId(article?.videoUrl) : '';
+
   if (loading) return (
     <div className="container py-5 text-center">
       <div className="spinner-border text-primary" role="status" />
@@ -279,11 +291,32 @@ const ArticleDetail = () => {
           </div>
         </div>
 
-        {article.thumbnail && (
+        {/* Video takes priority over thumbnail */}
+        {hasVideo ? (
+          <div className="ad-video-wrapper">
+            {isYouTube && youTubeId ? (
+              <iframe
+                className="ad-video-iframe"
+                src={`https://www.youtube.com/embed/${youTubeId}?rel=0&modestbranding=1`}
+                title={displayArticle?.title || article.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                className="ad-video-player"
+                src={article.videoUrl}
+                controls
+                poster={article.thumbnail || ''}
+              />
+            )}
+          </div>
+        ) : article.thumbnail ? (
           <div className="ad-thumbnail-wrapper">
             <img src={article.thumbnail} alt={displayArticle?.title || article.title} className="ad-thumbnail" />
           </div>
-        )}
+        ) : null}
 
         {lang === 'en' && translating && (
           <div className="text-center py-4">

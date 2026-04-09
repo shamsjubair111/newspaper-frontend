@@ -260,3 +260,24 @@
   .cmt-form-wrapper { padding: 14px; }
   .cmt-avatar { width: 36px; height: 36px; font-size: 12px; }
 }
+/* ── Video Player ── */
+.ad-video-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 28px;
+  background: #000;
+}
+
+.ad-video-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  border: none;
+}
+
+.ad-video-player {
+  width: 100%;
+  max-height: 460px;
+  display: block;
+  background: #000;
+}

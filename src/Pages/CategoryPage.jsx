@@ -123,6 +123,27 @@ const CategoryPage = () => {
     return `${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
   };
 
+  const extractYouTubeId = (url) => {
+    if (!url) return "";
+    const m = url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    );
+    return m ? m[1] : "";
+  };
+
+  const getCardThumb = (article) => {
+    if (article.videoUrl && article.videoUrl.trim() !== "") {
+      const ytId = extractYouTubeId(article.videoUrl);
+      if (ytId)
+        return {
+          src: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+          isVideo: true,
+        };
+    }
+    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
+    return null;
+  };
+
   if (loading)
     return (
       <div className="cp-page">
@@ -205,12 +226,31 @@ const CategoryPage = () => {
       {hero && (
         <div className="cp-hero">
           <Link to={`/article/${hero._id}`} className="cp-hero-link">
-            {hero.thumbnail && (
-              <div className="cp-hero-img">
-                <img src={hero.thumbnail} alt={getTitle(hero)} />
-                <div className="cp-hero-overlay" />
-              </div>
-            )}
+            {(() => {
+              const media = getCardThumb(hero);
+              return media ? (
+                <div className="cp-hero-img">
+                  <img src={media.src} alt={getTitle(hero)} />
+                  <div className="cp-hero-overlay" />
+                  {media.isVideo && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%,-50%)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="64" height="64">
+                        <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.5)" />
+                        <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              ) : null;
+            })()}
             <div className="cp-hero-body">
               <span className="cp-label">{pageTitle}</span>
               <h2 className="cp-hero-title">{getTitle(hero)}</h2>
@@ -238,11 +278,40 @@ const CategoryPage = () => {
                 to={`/article/${article._id}`}
                 className="cp-card"
               >
-                {article.thumbnail && (
-                  <div className="cp-card-img">
-                    <img src={article.thumbnail} alt={getTitle(article)} />
-                  </div>
-                )}
+                {(() => {
+                  const media = getCardThumb(article);
+                  return media ? (
+                    <div
+                      className="cp-card-img"
+                      style={{ position: "relative" }}
+                    >
+                      <img src={media.src} alt={getTitle(article)} />
+                      {media.isVideo && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "rgba(0,0,0,0.1)",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          <svg viewBox="0 0 24 24" width="40" height="40">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="12"
+                              fill="rgba(0,0,0,0.5)"
+                            />
+                            <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ) : null;
+                })()}
                 <div className="cp-card-body">
                   <span className="cp-label">{pageTitle}</span>
                   <h3 className="cp-card-title">{getTitle(article)}</h3>

@@ -25,6 +25,7 @@ const ArticleForm = () => {
     authorName: '',
     content: '',
     thumbnail: '',
+    videoUrl: '',
     category: '',
     subcategory: '',
     slayout: 'default'
@@ -134,6 +135,7 @@ const ArticleForm = () => {
         authorName: formData.authorName,
         content: plainTextToHtml(formData.content),
         thumbnail: formData.thumbnail,
+        videoUrl: formData.videoUrl || '',
         category: formData.category,
         slayout: formData.slayout,
       };
@@ -163,6 +165,7 @@ const ArticleForm = () => {
         authorName: '',
         content: '',
         thumbnail: '',
+        videoUrl: '',
         category: '',
         subcategory: '',
         slayout: 'default'
@@ -290,6 +293,24 @@ const ArticleForm = () => {
                     disabled={loading}
                   />
                   <div className="form-text">URL of the thumbnail image for this article</div>
+                </div>
+
+                {/* Video URL */}
+                <div className="mb-4">
+                  <label htmlFor="videoUrl" className="form-label fw-bold">
+                    Video URL <span className="text-muted">(Optional — YouTube or direct video link)</span>
+                  </label>
+                  <input
+                    type="url"
+                    className="form-control"
+                    id="videoUrl"
+                    name="videoUrl"
+                    value={formData.videoUrl}
+                    onChange={handleChange}
+                    placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4"
+                    disabled={loading}
+                  />
+                  <div className="form-text">If provided, the video will be shown on the article page instead of the thumbnail image.</div>
                 </div>
 
                 {/* Category & Subcategory */}

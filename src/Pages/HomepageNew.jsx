@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./Homepage.css";
 import { useLang } from "../context/LanguageContext";
 import { useT, translations } from "../context/translations";
-import { translateBatch, translateText } from "../context/translate";
+import { translateBatch } from "../context/translate";
 
 const HomePage = () => {
   const [articles, setArticles] = useState([]);
@@ -140,6 +140,34 @@ const HomePage = () => {
     return `${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
   };
 
+  // Extract YouTube video ID from various YouTube URL formats
+  const extractYouTubeId = (url) => {
+    if (!url) return "";
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return "";
+  };
+
+  // Returns best available image src for a card
+  // Priority: YouTube auto-thumb > article thumbnail > null
+  const getCardThumb = (article) => {
+    if (article.videoUrl && article.videoUrl.trim() !== "") {
+      const ytId = extractYouTubeId(article.videoUrl);
+      if (ytId)
+        return {
+          src: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+          isVideo: true,
+        };
+    }
+    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="hp-loading">
@@ -152,6 +180,11 @@ const HomePage = () => {
   const featured = filteredArticles.slice(1, 3);
   const topGrid = filteredArticles.slice(3, 7);
   const moreGrid = filteredArticles.slice(7, 13);
+
+  // Video section — articles that have a videoUrl AND belong to a "ভিডিও" / "Video" category
+  const videoArticles = articles.filter(
+    (a) => a.videoUrl && a.videoUrl.trim() !== "",
+  );
 
   return (
     <div className="hp-page">
@@ -195,12 +228,23 @@ const HomePage = () => {
       {hero && (
         <div className="hp-hero">
           <Link to={`/article/${hero._id}`} className="hp-hero-link">
-            {hero.thumbnail && (
-              <div className="hp-hero-img">
-                <img src={hero.thumbnail} alt={getTitle(hero)} />
-                <div className="hp-hero-overlay" />
-              </div>
-            )}
+            {(() => {
+              const media = getCardThumb(hero);
+              return media ? (
+                <div className="hp-hero-img">
+                  <img src={media.src} alt={getTitle(hero)} />
+                  <div className="hp-hero-overlay" />
+                  {media.isVideo && (
+                    <div className="hp-hero-play">
+                      <svg viewBox="0 0 24 24" width="56" height="56">
+                        <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.5)" />
+                        <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              ) : null;
+            })()}
             <div className="hp-hero-body">
               {hero.category?.name && (
                 <span className="hp-label">
@@ -225,11 +269,30 @@ const HomePage = () => {
                 to={`/article/${article._id}`}
                 className="hp-featured-card"
               >
-                {article.thumbnail && (
-                  <div className="hp-card-img">
-                    <img src={article.thumbnail} alt={getTitle(article)} />
-                  </div>
-                )}
+                {(() => {
+                  const m = getCardThumb(article);
+                  return m ? (
+                    <div
+                      className="hp-card-img"
+                      style={{ position: "relative" }}
+                    >
+                      <img src={m.src} alt={getTitle(article)} />
+                      {m.isVideo && (
+                        <div className="hp-card-play-icon">
+                          <svg viewBox="0 0 24 24" width="36" height="36">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="12"
+                              fill="rgba(0,0,0,0.5)"
+                            />
+                            <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ) : null;
+                })()}
                 <div className="hp-card-body">
                   {article.category?.name && (
                     <span className="hp-label">
@@ -267,11 +330,30 @@ const HomePage = () => {
                 to={`/article/${article._id}`}
                 className="hp-grid-card"
               >
-                {article.thumbnail && (
-                  <div className="hp-card-img">
-                    <img src={article.thumbnail} alt={getTitle(article)} />
-                  </div>
-                )}
+                {(() => {
+                  const m = getCardThumb(article);
+                  return m ? (
+                    <div
+                      className="hp-card-img"
+                      style={{ position: "relative" }}
+                    >
+                      <img src={m.src} alt={getTitle(article)} />
+                      {m.isVideo && (
+                        <div className="hp-card-play-icon">
+                          <svg viewBox="0 0 24 24" width="32" height="32">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="12"
+                              fill="rgba(0,0,0,0.5)"
+                            />
+                            <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ) : null;
+                })()}
                 <div className="hp-card-body">
                   {article.category?.name && (
                     <span className="hp-label">
@@ -320,11 +402,33 @@ const HomePage = () => {
               <div className="hp-cat-grid">
                 {/* Lead card — bigger */}
                 <Link to={`/article/${lead._id}`} className="hp-cat-lead">
-                  {lead.thumbnail && (
-                    <div className="hp-card-img hp-card-img--tall">
-                      <img src={lead.thumbnail} alt={getTitle(lead)} />
-                    </div>
-                  )}
+                  {(() => {
+                    const m = getCardThumb(lead);
+                    return m ? (
+                      <div
+                        className="hp-card-img hp-card-img--tall"
+                        style={{ position: "relative" }}
+                      >
+                        <img src={m.src} alt={getTitle(lead)} />
+                        {m.isVideo && (
+                          <div className="hp-card-play-icon">
+                            <svg viewBox="0 0 24 24" width="40" height="40">
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="12"
+                                fill="rgba(0,0,0,0.5)"
+                              />
+                              <polygon
+                                points="9.5,7 18,12 9.5,17"
+                                fill="white"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="hp-card-body">
                     <h3 className="hp-card-title hp-card-title--md">
                       {getTitle(lead)}
@@ -353,14 +457,33 @@ const HomePage = () => {
                       to={`/article/${article._id}`}
                       className="hp-cat-small"
                     >
-                      {article.thumbnail && (
-                        <div className="hp-cat-small-img">
-                          <img
-                            src={article.thumbnail}
-                            alt={getTitle(article)}
-                          />
-                        </div>
-                      )}
+                      {(() => {
+                        const m = getCardThumb(article);
+                        return m ? (
+                          <div
+                            className="hp-cat-small-img"
+                            style={{ position: "relative" }}
+                          >
+                            <img src={m.src} alt={getTitle(article)} />
+                            {m.isVideo && (
+                              <div className="hp-card-play-icon hp-card-play-icon--sm">
+                                <svg viewBox="0 0 24 24" width="26" height="26">
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="12"
+                                    fill="rgba(0,0,0,0.5)"
+                                  />
+                                  <polygon
+                                    points="9.5,7 18,12 9.5,17"
+                                    fill="white"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        ) : null;
+                      })()}
                       <div className="hp-card-body">
                         <h4 className="hp-card-title hp-card-title--sm">
                           {getTitle(article)}
@@ -400,11 +523,33 @@ const HomePage = () => {
                   to={`/article/${article._id}`}
                   className="hp-grid-card"
                 >
-                  {article.thumbnail && (
-                    <div className="hp-card-img">
-                      <img src={article.thumbnail} alt={getTitle(article)} />
-                    </div>
-                  )}
+                  {(() => {
+                    const m = getCardThumb(article);
+                    return m ? (
+                      <div
+                        className="hp-card-img"
+                        style={{ position: "relative" }}
+                      >
+                        <img src={m.src} alt={getTitle(article)} />
+                        {m.isVideo && (
+                          <div className="hp-card-play-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32">
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="12"
+                                fill="rgba(0,0,0,0.5)"
+                              />
+                              <polygon
+                                points="9.5,7 18,12 9.5,17"
+                                fill="white"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="hp-card-body">
                     {article.category?.name && (
                       <span className="hp-label">
@@ -427,6 +572,76 @@ const HomePage = () => {
                     </div>
                   </div>
                 </Link>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* ── VIDEO SECTION ── */}
+        {videoArticles.length > 0 && (
+          <div className="hp-video-section">
+            <div className="hp-section-header">
+              <span className="hp-section-title hp-section-title--video">
+                ▶ {lang === "en" ? "Video" : "ভিডিও"}
+              </span>
+            </div>
+            <div className="hp-video-grid">
+              {videoArticles.slice(0, 6).map((article) => (
+                <a
+                  key={article._id}
+                  href={`/article/${article._id}`}
+                  className="hp-video-card"
+                >
+                  <div className="hp-video-thumb">
+                    {/* Show YouTube thumbnail if YouTube URL, else article thumbnail */}
+                    {article.videoUrl &&
+                    article.videoUrl.includes("youtube") ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${extractYouTubeId(article.videoUrl)}/hqdefault.jpg`}
+                        alt={getTitle(article)}
+                      />
+                    ) : article.thumbnail ? (
+                      <img src={article.thumbnail} alt={getTitle(article)} />
+                    ) : (
+                      <div className="hp-video-thumb-placeholder" />
+                    )}
+                    <div className="hp-video-play-btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="white"
+                        width="36"
+                        height="36"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="12"
+                          fill="rgba(0,0,0,0.55)"
+                        />
+                        <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="hp-card-body">
+                    {article.category?.name && (
+                      <span className="hp-label hp-label--video">
+                        {getCatName(article.category) || article.category.name}
+                      </span>
+                    )}
+                    <h3 className="hp-card-title hp-card-title--sm">
+                      {getTitle(article)}
+                    </h3>
+                    <div className="hp-card-meta">
+                      {article.authorName && (
+                        <span className="hp-card-author">
+                          {article.authorName}
+                        </span>
+                      )}
+                      <span className="hp-card-date">
+                        {formatDate(article.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </a>
               ))}
             </div>
           </div>
