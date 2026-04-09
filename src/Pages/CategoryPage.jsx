@@ -19,6 +19,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryName, subcategoryName]);
 
   const decode = (str) => decodeURIComponent(str || "");
