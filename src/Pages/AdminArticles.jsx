@@ -22,6 +22,7 @@ const AdminArticles = () => {
       return;
     }
     fetchArticles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchArticles = async () => {

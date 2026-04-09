@@ -100,6 +100,7 @@ const HomePage = () => {
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter articles by selected date

@@ -19,6 +19,7 @@ const MyBookmarks = () => {
       return;
     }
     fetchBookmarks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchBookmarks = async () => {

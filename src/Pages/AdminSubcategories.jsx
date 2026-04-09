@@ -37,6 +37,7 @@ const AdminSubcategories = () => {
       return;
     }
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAll = async () => {

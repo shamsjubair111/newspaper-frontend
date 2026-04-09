@@ -47,6 +47,7 @@ const NavigationBar = () => {
       }
     };
     fetchCategoriesAndSubcategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Translate category and subcategory names when language is English
@@ -150,11 +151,6 @@ const NavigationBar = () => {
   // ── Calendar helpers ──
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-
-  const getArticleDatesForMonth = () => {
-    // This is computed on the Navbar level — we just need the active filter indicator
-    return {};
-  };
 
   const handleDayClick = (day) => {
     const { year, month } = calView;

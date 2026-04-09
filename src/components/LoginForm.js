@@ -44,6 +44,7 @@ const LoginForm = () => {
         document.body.removeChild(script);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGoogleCallback = async (response) => {

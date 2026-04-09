@@ -19,6 +19,7 @@ const MyComments = () => {
       return;
     }
     fetchMyComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMyComments = async () => {
