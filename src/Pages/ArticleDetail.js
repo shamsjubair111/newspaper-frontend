@@ -131,6 +131,7 @@ const ArticleDetail = () => {
     setBookmarkMsg('');
     try {
       const token = localStorage.getItem('token');
+      console.log("testing");
       if (isBookmarked) {
         await fetch(`${process.env.REACT_APP_API_URL}/api/bookmarks/${id}`, {
           method: 'DELETE',
