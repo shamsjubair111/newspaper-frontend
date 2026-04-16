@@ -10,18 +10,15 @@ import logo from '../assets/logo.png';
 const NavigationBar = () => {
   const navigate = useNavigate();
   const user = authAPI.getCurrentUser();
-  const { lang, toggleLang, filterDate, setFilterDate, clearFilter } = useLang();
+  const { lang, toggleLang, filterDate, setFilterDate, clearFilter, categories, subcategories } = useLang();
   const t = useT(lang);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const loading = categories.length === 0;
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null); // category._id
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [calView, setCalView] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
@@ -30,25 +27,7 @@ const NavigationBar = () => {
   const [translatedCatNames, setTranslatedCatNames] = useState({});
   const [translatedSubNames, setTranslatedSubNames] = useState({});
 
-  useEffect(() => {
-    const fetchCategoriesAndSubcategories = async () => {
-      try {
-        setLoading(true);
-        const categoriesResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/categories`);
-        const categoriesData = await categoriesResponse.json();
-        const subcategoriesResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/subcategories`);
-        const subcategoriesData = await subcategoriesResponse.json();
-        setCategories(categoriesData);
-        setSubcategories(subcategoriesData);
-      } catch (err) {
-        console.error('Error fetching menu data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategoriesAndSubcategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
 
   // Translate category and subcategory names when language is English
   useEffect(() => {
@@ -159,7 +138,6 @@ const NavigationBar = () => {
     } else {
       setFilterDate({ year, month, day });
     }
-    setCalendarOpen(false);
   };
 
   const handleMonthClick = () => {
@@ -168,8 +146,7 @@ const NavigationBar = () => {
       clearFilter();
     } else {
       setFilterDate({ year, month, day: null });
-      setCalendarOpen(false);
-    }
+      }
   };
 
   const prevMonth = () => setCalView(v => {
@@ -262,25 +239,8 @@ const NavigationBar = () => {
                 </svg>
               </button>
 
-              {/* Calendar filter button */}
+              {/* Calendar — always visible */}
               <div style={{ position: 'relative' }}>
-                <button
-                  className={`icon-btn cal-btn${isFilterActive ? ' cal-btn-active' : ''}`}
-                  onClick={() => setCalendarOpen(v => !v)}
-                  title={isFilterActive ? 'Clear date filter' : 'Filter by date'}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  {isFilterActive && <span className="cal-badge" />}
-                </button>
-
-                {calendarOpen && (
-                  <>
-                    <div className="cal-overlay-backdrop" onClick={() => setCalendarOpen(false)} />
                     <div className="cal-dropdown">
                       {/* Month navigation */}
                       <div className="cal-header">
@@ -335,14 +295,12 @@ const NavigationBar = () => {
                       {/* Footer */}
                       {isFilterActive && (
                         <div className="cal-footer">
-                          <button className="cal-clear-btn" onClick={() => { clearFilter(); setCalendarOpen(false); }}>
+                          <button className="cal-clear-btn" onClick={() => { clearFilter(); }}>
                             ✕ {lang === 'en' ? 'Clear filter' : 'ফিল্টার মুছুন'}
                           </button>
                         </div>
                       )}
                     </div>
-                  </>
-                )}
               </div>
             </div>
 
@@ -356,15 +314,15 @@ const NavigationBar = () => {
 
             {/* Right: Auth */}
             <div className="auth-section">
+              <button
+                className="lang-toggle-btn"
+                onClick={toggleLang}
+                title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পড়ুন'}
+              >
+                {lang === 'bn' ? 'EN' : 'বাং'}
+              </button>
               {user ? (
                 <div className="d-flex align-items-center gap-2">
-                <button
-                  className="lang-toggle-btn"
-                  onClick={toggleLang}
-                  title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পড়ুন'}
-                >
-                  {lang === 'bn' ? 'EN' : 'বাং'}
-                </button>
                 <div className="dropdown">
                   <button className="login-btn dropdown-toggle" data-bs-toggle="dropdown">
                     {user.name}

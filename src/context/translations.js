@@ -16,6 +16,7 @@ export const translations = {
 
     // Homepage
     recentSidebar: 'সাম্প্রতিক',
+    inFocus: 'ইন ফোকাস',
     readMore: 'আরও পড়ুন',
     advertisement: 'Advertisement',
 
@@ -113,6 +114,7 @@ export const translations = {
 
     // Homepage
     recentSidebar: 'Recent',
+    inFocus: 'In Focus',
     readMore: 'Read More',
     advertisement: 'Advertisement',
 

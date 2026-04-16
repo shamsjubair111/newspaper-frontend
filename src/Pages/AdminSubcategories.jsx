@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/api";
+import { useLang } from "../context/LanguageContext";
 
 const AdminSubcategories = () => {
+  const { refreshCategories } = useLang();
   const [subcategories, setSubcategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +52,7 @@ const AdminSubcategories = () => {
       const subData = await subRes.json();
       const catData = await catRes.json();
       setSubcategories(subData);
+      refreshCategories();
       setCategories(catData);
     } catch (err) {
       setError("Failed to load data");
@@ -189,6 +192,7 @@ const AdminSubcategories = () => {
         throw new Error(data.message || "Failed to delete subcategory");
       }
       setSubcategories((prev) => prev.filter((s) => s._id !== subId));
+      refreshCategories();
       showSuccess(`"${name}" deleted successfully.`);
     } catch (err) {
       setError(err.message);

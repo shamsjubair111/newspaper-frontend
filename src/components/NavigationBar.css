@@ -59,7 +59,7 @@
 @media (max-width: 576px) { .logo-img { height: 46px; } }
 
 /* Auth Section */
-.auth-section { min-width: 100px; text-align: right; }
+.auth-section { min-width: 100px; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 
 .login-btn {
   background: rgba(255,255,255,0.15);
@@ -459,18 +459,17 @@
 }
 
 .cal-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 1999;
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: auto;
   background: #fff;
   border: 1px solid #d4c9a3;
   border-radius: 8px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   width: 280px;
   padding: 12px;
   font-family: 'SolaimanLipi', 'Kalpurush', Arial, sans-serif;
-  animation: calDrop 0.15s ease;
 }
 
 @keyframes calDrop {

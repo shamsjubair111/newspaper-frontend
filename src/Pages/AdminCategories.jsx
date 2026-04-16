@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/api";
+import { useLang } from "../context/LanguageContext";
 
 const AdminCategories = () => {
+  const { refreshCategories } = useLang();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -93,6 +95,7 @@ const AdminCategories = () => {
       if (!res.ok) throw new Error(data.message || "Failed to create category");
       setCategories((prev) => [...prev, data]);
       setNewName("");
+      refreshCategories();
       showSuccess(`"${data.name}" created successfully.`);
     } catch (err) {
       setError(err.message);
@@ -141,6 +144,7 @@ const AdminCategories = () => {
         prev.map((c) => (c._id === categoryId ? data : c)),
       );
       cancelEdit();
+      refreshCategories();
       showSuccess(`Category updated to "${data.name}".`);
     } catch (err) {
       setError(err.message);
@@ -179,6 +183,7 @@ const AdminCategories = () => {
         throw new Error(data.message || "Failed to delete category");
       }
       setCategories((prev) => prev.filter((c) => c._id !== categoryId));
+      refreshCategories();
       showSuccess(`"${name}" deleted successfully.`);
     } catch (err) {
       setError(err.message);

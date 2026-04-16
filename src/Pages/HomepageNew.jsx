@@ -141,7 +141,6 @@ const HomePage = () => {
     return `${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
   };
 
-  // Extract YouTube video ID from various YouTube URL formats
   const extractYouTubeId = (url) => {
     if (!url) return "";
     const patterns = [
@@ -154,8 +153,6 @@ const HomePage = () => {
     return "";
   };
 
-  // Returns best available image src for a card
-  // Priority: YouTube auto-thumb > article thumbnail > null
   const getCardThumb = (article) => {
     if (article.videoUrl && article.videoUrl.trim() !== "") {
       const ytId = extractYouTubeId(article.videoUrl);
@@ -182,7 +179,7 @@ const HomePage = () => {
   const topGrid = filteredArticles.slice(3, 7);
   const moreGrid = filteredArticles.slice(7, 13);
 
-  // Video section — articles that have a videoUrl AND belong to a "ভিডিও" / "Video" category
+  // Video section — articles that have a videoUrl
   const videoArticles = articles.filter(
     (a) => a.videoUrl && a.videoUrl.trim() !== "",
   );
@@ -383,14 +380,14 @@ const HomePage = () => {
 
         {/* ── CATEGORY SECTIONS ── */}
         {categories.map((category) => {
+          // Skip Video category — it is shown in the In Focus section below
+          if (category.name === "Video" || category.name === "ভিডিও")
+            return null;
           const catArticles = getArticlesByCategory(category._id);
           if (catArticles.length === 0) return null;
-
           const [lead, ...rest] = catArticles;
-
           return (
             <div key={category._id} className="hp-cat-section">
-              {/* Category header */}
               <div className="hp-cat-header">
                 <Link
                   to={`/${encodeURIComponent(category.name)}`}
@@ -399,9 +396,7 @@ const HomePage = () => {
                   {getCatName(category)}
                 </Link>
               </div>
-
               <div className="hp-cat-grid">
-                {/* Lead card — bigger */}
                 <Link to={`/article/${lead._id}`} className="hp-cat-lead">
                   {(() => {
                     const m = getCardThumb(lead);
@@ -449,8 +444,6 @@ const HomePage = () => {
                     </div>
                   </div>
                 </Link>
-
-                {/* Rest as small cards */}
                 <div className="hp-cat-rest">
                   {rest.slice(0, 3).map((article) => (
                     <Link
@@ -577,12 +570,13 @@ const HomePage = () => {
             </div>
           </div>
         )}
-        {/* ── VIDEO SECTION ── */}
+
+        {/* ── IN FOCUS / VIDEO SECTION ── */}
         {videoArticles.length > 0 && (
           <div className="hp-video-section">
             <div className="hp-section-header">
               <span className="hp-section-title hp-section-title--video">
-                ▶ {lang === "en" ? "Video" : "ভিডিও"}
+                ▶ {t("inFocus")}
               </span>
             </div>
             <div className="hp-video-grid">
@@ -593,7 +587,6 @@ const HomePage = () => {
                   className="hp-video-card"
                 >
                   <div className="hp-video-thumb">
-                    {/* Show YouTube thumbnail if YouTube URL, else article thumbnail */}
                     {article.videoUrl &&
                     article.videoUrl.includes("youtube") ? (
                       <img

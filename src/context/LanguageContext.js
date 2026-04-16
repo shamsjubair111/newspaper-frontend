@@ -1,11 +1,29 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'bn');
-  // Calendar filter state — shared between Navbar (sets) and Homepage (reads)
-  const [filterDate, setFilterDate] = useState(null); // { year, month } or null
+  const [filterDate, setFilterDate] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const [catRes, subRes] = await Promise.all([
+        fetch(`${process.env.REACT_APP_API_URL}/api/categories`),
+        fetch(`${process.env.REACT_APP_API_URL}/api/subcategories`),
+      ]);
+      const catData = await catRes.json();
+      const subData = await subRes.json();
+      if (Array.isArray(catData)) setCategories(catData);
+      if (Array.isArray(subData)) setSubcategories(subData);
+    } catch (err) {}
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const toggleLang = useCallback(() => {
     setLang(prev => {
@@ -18,7 +36,11 @@ export const LanguageProvider = ({ children }) => {
   const clearFilter = useCallback(() => setFilterDate(null), []);
 
   return (
-    <LanguageContext.Provider value={{ lang, toggleLang, filterDate, setFilterDate, clearFilter }}>
+    <LanguageContext.Provider value={{
+      lang, toggleLang,
+      filterDate, setFilterDate, clearFilter,
+      categories, subcategories, refreshCategories: fetchCategories
+    }}>
       {children}
     </LanguageContext.Provider>
   );
