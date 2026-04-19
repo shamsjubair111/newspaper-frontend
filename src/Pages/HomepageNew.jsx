@@ -4,6 +4,7 @@ import "./Homepage.css";
 import { useLang } from "../context/LanguageContext";
 import { useT, translations } from "../context/translations";
 import { translateBatch } from "../context/translate";
+import CalendarSidebar from "../components/CalendarSidebar";
 
 const HomePage = () => {
   const [articles, setArticles] = useState([]);
@@ -257,158 +258,28 @@ const HomePage = () => {
         </div>
       )}
 
-      <div className="hp-container">
-        {/* ── FEATURED 2-col ── */}
-        {featured.length > 0 && (
-          <div className="hp-featured-row">
-            {featured.map((article) => (
-              <Link
-                key={article._id}
-                to={`/article/${article._id}`}
-                className="hp-featured-card"
-              >
-                {(() => {
-                  const m = getCardThumb(article);
-                  return m ? (
-                    <div
-                      className="hp-card-img"
-                      style={{ position: "relative" }}
-                    >
-                      <img src={m.src} alt={getTitle(article)} />
-                      {m.isVideo && (
-                        <div className="hp-card-play-icon">
-                          <svg viewBox="0 0 24 24" width="36" height="36">
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="12"
-                              fill="rgba(0,0,0,0.5)"
-                            />
-                            <polygon points="9.5,7 18,12 9.5,17" fill="white" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  ) : null;
-                })()}
-                <div className="hp-card-body">
-                  {article.category?.name && (
-                    <span className="hp-label">
-                      {getCatName(article.category) || article.category.name}
-                    </span>
-                  )}
-                  <h2 className="hp-card-title hp-card-title--lg">
-                    {getTitle(article)}
-                  </h2>
-                  <p className="hp-card-excerpt">
-                    {getExcerptStr(article, 100)}
-                  </p>
-                  <div className="hp-card-meta">
-                    {article.authorName && (
-                      <span className="hp-card-author">
-                        {article.authorName}
-                      </span>
-                    )}
-                    <span className="hp-card-date">
-                      {formatDate(article.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* ── TOP GRID 4-col ── */}
-        {topGrid.length > 0 && (
-          <div className="hp-grid-4">
-            {topGrid.map((article) => (
-              <Link
-                key={article._id}
-                to={`/article/${article._id}`}
-                className="hp-grid-card"
-              >
-                {(() => {
-                  const m = getCardThumb(article);
-                  return m ? (
-                    <div
-                      className="hp-card-img"
-                      style={{ position: "relative" }}
-                    >
-                      <img src={m.src} alt={getTitle(article)} />
-                      {m.isVideo && (
-                        <div className="hp-card-play-icon">
-                          <svg viewBox="0 0 24 24" width="32" height="32">
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="12"
-                              fill="rgba(0,0,0,0.5)"
-                            />
-                            <polygon points="9.5,7 18,12 9.5,17" fill="white" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  ) : null;
-                })()}
-                <div className="hp-card-body">
-                  {article.category?.name && (
-                    <span className="hp-label">
-                      {getCatName(article.category) || article.category.name}
-                    </span>
-                  )}
-                  <h3 className="hp-card-title">{getTitle(article)}</h3>
-                  <p className="hp-card-excerpt">
-                    {getExcerptStr(article, 80)}
-                  </p>
-                  <div className="hp-card-meta">
-                    {article.authorName && (
-                      <span className="hp-card-author">
-                        {article.authorName}
-                      </span>
-                    )}
-                    <span className="hp-card-date">
-                      {formatDate(article.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* ── CATEGORY SECTIONS ── */}
-        {categories.map((category) => {
-          // Skip Video category — it is shown in the In Focus section below
-          if (category.name === "Video" || category.name === "ভিডিও")
-            return null;
-          const catArticles = getArticlesByCategory(category._id);
-          if (catArticles.length === 0) return null;
-          const [lead, ...rest] = catArticles;
-          return (
-            <div key={category._id} className="hp-cat-section">
-              <div className="hp-cat-header">
+      <div className="hp-layout">
+        <div className="hp-main">
+          {/* ── FEATURED 2-col ── */}
+          {featured.length > 0 && (
+            <div className="hp-featured-row">
+              {featured.map((article) => (
                 <Link
-                  to={`/${encodeURIComponent(category.name)}`}
-                  className="hp-cat-name"
+                  key={article._id}
+                  to={`/article/${article._id}`}
+                  className="hp-featured-card"
                 >
-                  {getCatName(category)}
-                </Link>
-              </div>
-              <div className="hp-cat-grid">
-                <Link to={`/article/${lead._id}`} className="hp-cat-lead">
                   {(() => {
-                    const m = getCardThumb(lead);
+                    const m = getCardThumb(article);
                     return m ? (
                       <div
-                        className="hp-card-img hp-card-img--tall"
+                        className="hp-card-img"
                         style={{ position: "relative" }}
                       >
-                        <img src={m.src} alt={getTitle(lead)} />
+                        <img src={m.src} alt={getTitle(article)} />
                         {m.isVideo && (
                           <div className="hp-card-play-icon">
-                            <svg viewBox="0 0 24 24" width="40" height="40">
+                            <svg viewBox="0 0 24 24" width="36" height="36">
                               <circle
                                 cx="12"
                                 cy="12"
@@ -426,92 +297,37 @@ const HomePage = () => {
                     ) : null;
                   })()}
                   <div className="hp-card-body">
-                    <h3 className="hp-card-title hp-card-title--md">
-                      {getTitle(lead)}
-                    </h3>
+                    {article.category?.name && (
+                      <span className="hp-label">
+                        {getCatName(article.category) || article.category.name}
+                      </span>
+                    )}
+                    <h2 className="hp-card-title hp-card-title--lg">
+                      {getTitle(article)}
+                    </h2>
                     <p className="hp-card-excerpt">
-                      {getExcerptStr(lead, 110)}
+                      {getExcerptStr(article, 100)}
                     </p>
                     <div className="hp-card-meta">
-                      {lead.authorName && (
+                      {article.authorName && (
                         <span className="hp-card-author">
-                          {lead.authorName}
+                          {article.authorName}
                         </span>
                       )}
                       <span className="hp-card-date">
-                        {formatDate(lead.createdAt)}
+                        {formatDate(article.createdAt)}
                       </span>
                     </div>
                   </div>
                 </Link>
-                <div className="hp-cat-rest">
-                  {rest.slice(0, 3).map((article) => (
-                    <Link
-                      key={article._id}
-                      to={`/article/${article._id}`}
-                      className="hp-cat-small"
-                    >
-                      {(() => {
-                        const m = getCardThumb(article);
-                        return m ? (
-                          <div
-                            className="hp-cat-small-img"
-                            style={{ position: "relative" }}
-                          >
-                            <img src={m.src} alt={getTitle(article)} />
-                            {m.isVideo && (
-                              <div className="hp-card-play-icon hp-card-play-icon--sm">
-                                <svg viewBox="0 0 24 24" width="26" height="26">
-                                  <circle
-                                    cx="12"
-                                    cy="12"
-                                    r="12"
-                                    fill="rgba(0,0,0,0.5)"
-                                  />
-                                  <polygon
-                                    points="9.5,7 18,12 9.5,17"
-                                    fill="white"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        ) : null;
-                      })()}
-                      <div className="hp-card-body">
-                        <h4 className="hp-card-title hp-card-title--sm">
-                          {getTitle(article)}
-                        </h4>
-                        <p className="hp-card-excerpt hp-card-excerpt--xs">
-                          {getExcerptStr(article, 60)}
-                        </p>
-                        <div className="hp-card-meta">
-                          {article.authorName && (
-                            <span className="hp-card-author">
-                              {article.authorName}
-                            </span>
-                          )}
-                          <span className="hp-card-date">
-                            {formatDate(article.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
-          );
-        })}
+          )}
 
-        {/* ── MORE ARTICLES 3-col ── */}
-        {moreGrid.length > 0 && (
-          <div className="hp-more-section">
-            <div className="hp-section-header">
-              <span className="hp-section-title">{t("readMore")}</span>
-            </div>
-            <div className="hp-grid-3">
-              {moreGrid.map((article) => (
+          {/* ── TOP GRID 4-col ── */}
+          {topGrid.length > 0 && (
+            <div className="hp-grid-4">
+              {topGrid.map((article) => (
                 <Link
                   key={article._id}
                   to={`/article/${article._id}`}
@@ -568,79 +384,281 @@ const HomePage = () => {
                 </Link>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── IN FOCUS / VIDEO SECTION ── */}
-        {videoArticles.length > 0 && (
-          <div className="hp-video-section">
-            <div className="hp-section-header">
-              <span className="hp-section-title hp-section-title--video">
-                ▶ {t("inFocus")}
-              </span>
-            </div>
-            <div className="hp-video-grid">
-              {videoArticles.slice(0, 6).map((article) => (
-                <a
-                  key={article._id}
-                  href={`/article/${article._id}`}
-                  className="hp-video-card"
-                >
-                  <div className="hp-video-thumb">
-                    {article.videoUrl &&
-                    article.videoUrl.includes("youtube") ? (
-                      <img
-                        src={`https://img.youtube.com/vi/${extractYouTubeId(article.videoUrl)}/hqdefault.jpg`}
-                        alt={getTitle(article)}
-                      />
-                    ) : article.thumbnail ? (
-                      <img src={article.thumbnail} alt={getTitle(article)} />
-                    ) : (
-                      <div className="hp-video-thumb-placeholder" />
-                    )}
-                    <div className="hp-video-play-btn">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="white"
-                        width="36"
-                        height="36"
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="12"
-                          fill="rgba(0,0,0,0.55)"
-                        />
-                        <polygon points="9.5,7 18,12 9.5,17" fill="white" />
-                      </svg>
+          {/* ── CATEGORY SECTIONS ── */}
+          {categories.map((category) => {
+            // Skip Video category — it is shown in the In Focus section below
+            if (category.name === "Video" || category.name === "ভিডিও")
+              return null;
+            const catArticles = getArticlesByCategory(category._id);
+            if (catArticles.length === 0) return null;
+            const [lead, ...rest] = catArticles;
+            return (
+              <div key={category._id} className="hp-cat-section">
+                <div className="hp-cat-header">
+                  <Link
+                    to={`/${encodeURIComponent(category.name)}`}
+                    className="hp-cat-name"
+                  >
+                    {getCatName(category)}
+                  </Link>
+                </div>
+                <div className="hp-cat-grid">
+                  <Link to={`/article/${lead._id}`} className="hp-cat-lead">
+                    {(() => {
+                      const m = getCardThumb(lead);
+                      return m ? (
+                        <div
+                          className="hp-card-img hp-card-img--tall"
+                          style={{ position: "relative" }}
+                        >
+                          <img src={m.src} alt={getTitle(lead)} />
+                          {m.isVideo && (
+                            <div className="hp-card-play-icon">
+                              <svg viewBox="0 0 24 24" width="40" height="40">
+                                <circle
+                                  cx="12"
+                                  cy="12"
+                                  r="12"
+                                  fill="rgba(0,0,0,0.5)"
+                                />
+                                <polygon
+                                  points="9.5,7 18,12 9.5,17"
+                                  fill="white"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
+                    <div className="hp-card-body">
+                      <h3 className="hp-card-title hp-card-title--md">
+                        {getTitle(lead)}
+                      </h3>
+                      <p className="hp-card-excerpt">
+                        {getExcerptStr(lead, 110)}
+                      </p>
+                      <div className="hp-card-meta">
+                        {lead.authorName && (
+                          <span className="hp-card-author">
+                            {lead.authorName}
+                          </span>
+                        )}
+                        <span className="hp-card-date">
+                          {formatDate(lead.createdAt)}
+                        </span>
+                      </div>
                     </div>
+                  </Link>
+                  <div className="hp-cat-rest">
+                    {rest.slice(0, 3).map((article) => (
+                      <Link
+                        key={article._id}
+                        to={`/article/${article._id}`}
+                        className="hp-cat-small"
+                      >
+                        {(() => {
+                          const m = getCardThumb(article);
+                          return m ? (
+                            <div
+                              className="hp-cat-small-img"
+                              style={{ position: "relative" }}
+                            >
+                              <img src={m.src} alt={getTitle(article)} />
+                              {m.isVideo && (
+                                <div className="hp-card-play-icon hp-card-play-icon--sm">
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    width="26"
+                                    height="26"
+                                  >
+                                    <circle
+                                      cx="12"
+                                      cy="12"
+                                      r="12"
+                                      fill="rgba(0,0,0,0.5)"
+                                    />
+                                    <polygon
+                                      points="9.5,7 18,12 9.5,17"
+                                      fill="white"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          ) : null;
+                        })()}
+                        <div className="hp-card-body">
+                          <h4 className="hp-card-title hp-card-title--sm">
+                            {getTitle(article)}
+                          </h4>
+                          <p className="hp-card-excerpt hp-card-excerpt--xs">
+                            {getExcerptStr(article, 60)}
+                          </p>
+                          <div className="hp-card-meta">
+                            {article.authorName && (
+                              <span className="hp-card-author">
+                                {article.authorName}
+                              </span>
+                            )}
+                            <span className="hp-card-date">
+                              {formatDate(article.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                  <div className="hp-card-body">
-                    {article.category?.name && (
-                      <span className="hp-label hp-label--video">
-                        {getCatName(article.category) || article.category.name}
-                      </span>
-                    )}
-                    <h3 className="hp-card-title hp-card-title--sm">
-                      {getTitle(article)}
-                    </h3>
-                    <div className="hp-card-meta">
-                      {article.authorName && (
-                        <span className="hp-card-author">
-                          {article.authorName}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* ── MORE ARTICLES 3-col ── */}
+          {moreGrid.length > 0 && (
+            <div className="hp-more-section">
+              <div className="hp-section-header">
+                <span className="hp-section-title">{t("readMore")}</span>
+              </div>
+              <div className="hp-grid-3">
+                {moreGrid.map((article) => (
+                  <Link
+                    key={article._id}
+                    to={`/article/${article._id}`}
+                    className="hp-grid-card"
+                  >
+                    {(() => {
+                      const m = getCardThumb(article);
+                      return m ? (
+                        <div
+                          className="hp-card-img"
+                          style={{ position: "relative" }}
+                        >
+                          <img src={m.src} alt={getTitle(article)} />
+                          {m.isVideo && (
+                            <div className="hp-card-play-icon">
+                              <svg viewBox="0 0 24 24" width="32" height="32">
+                                <circle
+                                  cx="12"
+                                  cy="12"
+                                  r="12"
+                                  fill="rgba(0,0,0,0.5)"
+                                />
+                                <polygon
+                                  points="9.5,7 18,12 9.5,17"
+                                  fill="white"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
+                    <div className="hp-card-body">
+                      {article.category?.name && (
+                        <span className="hp-label">
+                          {getCatName(article.category) ||
+                            article.category.name}
                         </span>
                       )}
-                      <span className="hp-card-date">
-                        {formatDate(article.createdAt)}
-                      </span>
+                      <h3 className="hp-card-title">{getTitle(article)}</h3>
+                      <p className="hp-card-excerpt">
+                        {getExcerptStr(article, 80)}
+                      </p>
+                      <div className="hp-card-meta">
+                        {article.authorName && (
+                          <span className="hp-card-author">
+                            {article.authorName}
+                          </span>
+                        )}
+                        <span className="hp-card-date">
+                          {formatDate(article.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </a>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* ── IN FOCUS / VIDEO SECTION ── */}
+          {videoArticles.length > 0 && (
+            <div className="hp-video-section">
+              <div className="hp-section-header">
+                <span className="hp-section-title hp-section-title--video">
+                  ▶ {t("inFocus")}
+                </span>
+              </div>
+              <div className="hp-video-grid">
+                {videoArticles.slice(0, 6).map((article) => (
+                  <a
+                    key={article._id}
+                    href={`/article/${article._id}`}
+                    className="hp-video-card"
+                  >
+                    <div className="hp-video-thumb">
+                      {article.videoUrl &&
+                      article.videoUrl.includes("youtube") ? (
+                        <img
+                          src={`https://img.youtube.com/vi/${extractYouTubeId(article.videoUrl)}/hqdefault.jpg`}
+                          alt={getTitle(article)}
+                        />
+                      ) : article.thumbnail ? (
+                        <img src={article.thumbnail} alt={getTitle(article)} />
+                      ) : (
+                        <div className="hp-video-thumb-placeholder" />
+                      )}
+                      <div className="hp-video-play-btn">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="white"
+                          width="36"
+                          height="36"
+                        >
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="12"
+                            fill="rgba(0,0,0,0.55)"
+                          />
+                          <polygon points="9.5,7 18,12 9.5,17" fill="white" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="hp-card-body">
+                      {article.category?.name && (
+                        <span className="hp-label hp-label--video">
+                          {getCatName(article.category) ||
+                            article.category.name}
+                        </span>
+                      )}
+                      <h3 className="hp-card-title hp-card-title--sm">
+                        {getTitle(article)}
+                      </h3>
+                      <div className="hp-card-meta">
+                        {article.authorName && (
+                          <span className="hp-card-author">
+                            {article.authorName}
+                          </span>
+                        )}
+                        <span className="hp-card-date">
+                          {formatDate(article.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        {/* end hp-main */}
+        <CalendarSidebar />
       </div>
+      {/* end hp-layout */}
     </div>
   );
 };

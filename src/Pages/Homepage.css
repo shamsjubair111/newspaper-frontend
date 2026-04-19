@@ -16,11 +16,23 @@
   color: #00a8e0;
 }
 
-.hp-container {
+
+/* ── Two-column layout: main content + calendar sidebar ── */
+.hp-layout {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px 60px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
 }
+
+.hp-main {
+  flex: 1;
+  min-width: 0;
+}
+
+
 
 /* ── Shared card elements ── */
 .hp-card-img {
@@ -386,6 +398,9 @@ a.hp-hero-link:hover .hp-hero-title {
 
 /* ════ RESPONSIVE ════ */
 @media (max-width: 991px) {
+  .hp-layout { flex-direction: column; }
+  .hp-main { width: 100%; }
+
   .hp-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .hp-hero-title { font-size: 26px; }
   .hp-hero-img { height: 360px; }
@@ -711,6 +726,9 @@ a.hp-hero-link:hover .hp-hero-title {
 
 /* ── Responsive ── */
 @media (max-width: 991px) {
+  .hp-layout { flex-direction: column; }
+  .hp-main { width: 100%; }
+
   .cp-grid { grid-template-columns: repeat(2, 1fr); }
   .cp-hero-img { height: 340px; }
   .cp-hero-title { font-size: 24px; }
