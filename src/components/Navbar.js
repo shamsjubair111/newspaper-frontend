@@ -10,7 +10,7 @@ import logo from '../assets/logo.png';
 const NavigationBar = () => {
   const navigate = useNavigate();
   const user = authAPI.getCurrentUser();
-  const { lang, toggleLang, filterDate, setFilterDate, clearFilter, categories, subcategories } = useLang();
+  const { lang, toggleLang, categories, subcategories } = useLang();
   const t = useT(lang);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const loading = categories.length === 0;
