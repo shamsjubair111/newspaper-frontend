@@ -5,7 +5,7 @@ import './NavigationBar.css';
 import { useLang } from '../context/LanguageContext';
 import { translateBatch } from '../context/translate';
 import { translations, useT } from '../context/translations';
-import logo from '../assets/logo.png';
+import logo from '../assets/logov2.png';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -209,8 +209,8 @@ const NavigationBar = () => {
             <div className="logo-section">
               <Link to="/" className="logo-link">
                 <img src={logo} alt="সমাচার প্রবাহ" className="logo-img" />
+                <div className="date-section">{getCurrentDate()}</div>
               </Link>
-              <div className="date-section">{getCurrentDate()}</div>
             </div>
 
             {/* Right: Auth */}

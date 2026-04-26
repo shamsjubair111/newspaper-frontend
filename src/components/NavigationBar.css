@@ -44,11 +44,11 @@
 .icon-btn:hover { color: #ffffff; }
 
 /* Logo Section */
-.logo-section { flex: 1; text-align: center; margin-top: 0 !important; }
-.logo-link { text-decoration: none; display: inline-block; }
+.logo-section { flex: 1; margin-top: 0 !important; display: flex; justify-content: center; align-items: center; }
+.logo-link { text-decoration: none; display: flex; flex-direction: column; align-items: center; }
 
 .logo-img {
-  height: 200px;
+  height: 100px;
   width: auto;
   display: block;
   object-fit: contain;
@@ -103,7 +103,7 @@
 
 /* Date Section */
 .date-section {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255,255,255,0.75);
   margin-top: 2px;
   padding-bottom: 4px;
