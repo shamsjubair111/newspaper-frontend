@@ -22,6 +22,47 @@ const NavigationBar = () => {
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [translatedCatNames, setTranslatedCatNames] = useState({});
   const [translatedSubNames, setTranslatedSubNames] = useState({});
+  const [currentTime, setCurrentTime] = useState('');
+  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  // Geolocation-based timezone detection
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const res = await fetch(
+              `https://timeapi.io/api/timezone/coordinate?latitude=${latitude}&longitude=${longitude}`
+            );
+            const data = await res.json();
+            if (data?.timeZone) setTimezone(data.timeZone);
+          } catch {
+            // fallback to browser timezone already set
+          }
+        },
+        () => { /* permission denied — keep browser default */ }
+      );
+    }
+  }, []);
+
+  // Live clock ticker
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone: timezone,
+      });
+      setCurrentTime(timeStr);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [timezone]);
 
 
 
@@ -209,7 +250,12 @@ const NavigationBar = () => {
             <div className="logo-section">
               <Link to="/" className="logo-link">
                 <img src={logo} alt="সমাচার প্রবাহ" className="logo-img" />
-                <div className="date-section">{getCurrentDate()}</div>
+                <div className="date-section">
+                  <span className="date-text">{getCurrentDate()}</span>
+                  {currentTime && (
+                    <span className="time-text">{currentTime}</span>
+                  )}
+                </div>
               </Link>
             </div>
 
