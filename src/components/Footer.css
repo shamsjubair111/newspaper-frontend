@@ -43,6 +43,8 @@
 .footer-social-btn:hover { opacity: 0.85; transform: translateY(-2px); }
 .footer-fb { background: #1877f2; }
 .footer-x  { background: #1a1a1a; border: 1px solid #333; }
+.footer-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.footer-th { background: #1a1a1a; border: 1px solid #333; }
 
 /* Columns */
 .footer-col-title {
