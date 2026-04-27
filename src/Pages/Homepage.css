@@ -496,8 +496,10 @@ a.hp-hero-link:hover .hp-hero-title {
 .cp-breadcrumb-link:hover { color: #40c8ff; }
 
 .cp-breadcrumb-sep {
-  font-size: 11px;
+  font-size: 16px;
+  font-weight: 900;
   color: #1e3448;
+  vertical-align: middle;
 }
 
 .cp-breadcrumb-current {
