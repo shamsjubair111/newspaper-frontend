@@ -242,10 +242,8 @@ const ArticleDetail = () => {
 
         {displayArticle?.authorName && <div className="ad-author-top">{displayArticle.authorName}</div>}
 
-        <div className="ad-title-wrap">
-          <h1 className="ad-title">{displayArticle?.title || article.title}</h1>
-          <div className="ad-title-divider" />
-        </div>
+        <h1 className="ad-title">{displayArticle?.title || article.title}</h1>
+        <div className="ad-title-divider" />
 
         {bookmarkMsg && (
           <div className={`ad-bookmark-toast ${isBookmarked ? 'ad-bookmark-toast-success' : 'ad-bookmark-toast-removed'}`}>
