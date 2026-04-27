@@ -52,7 +52,7 @@
   width: auto;
   display: block;
   object-fit: contain;
-  mix-blend-mode: multiply; /* removes white background on colored navbar */
+   /* removes white background on colored navbar */
 }
 
 @media (max-width: 991px) { .logo-img { height: 58px; } }
