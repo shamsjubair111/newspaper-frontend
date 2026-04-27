@@ -15,7 +15,7 @@
 .ad-breadcrumb { font-size: 12px; margin-bottom: 16px; color: #4a7090; text-transform: uppercase; letter-spacing: 0.5px; }
 .ad-breadcrumb-link { color: #00a8e0; text-decoration: none; font-weight: 600; }
 .ad-breadcrumb-link:hover { color: #40c8ff; text-decoration: underline; }
-.ad-breadcrumb-sep { color: #2a4a64; margin: 0 6px; }
+.ad-breadcrumb-sep { color: #2a4a64; margin: 0 6px; font-weight: 900; font-size: 16px; line-height: 1; vertical-align: middle; }
 
 /* ── Author above title ── */
 .ad-author-top { font-size: 13px; color: #4a7090; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
