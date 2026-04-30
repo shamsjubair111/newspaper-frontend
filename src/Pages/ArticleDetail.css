@@ -281,3 +281,152 @@
   display: block;
   background: #000;
 }
+/* ── New share buttons ── */
+.ad-share-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.ad-share-threads   { background: #1a1a1a; }
+.ad-share-edit      { background: #1a7a4a; }
+.ad-share-edit:hover { background: #15663e; }
+
+/* ── Edit Modal ── */
+.ad-edit-overlay {
+  position: fixed; inset: 0;
+  background: rgba(5, 12, 22, 0.82);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; padding: 16px;
+  backdrop-filter: blur(3px);
+}
+.ad-edit-modal {
+  background: #0f2236;
+  border: 1px solid #1e3448;
+  border-radius: 8px;
+  width: 100%; max-width: 700px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column;
+}
+.ad-edit-modal::-webkit-scrollbar { width: 6px; }
+.ad-edit-modal::-webkit-scrollbar-track { background: #0d1b2a; }
+.ad-edit-modal::-webkit-scrollbar-thumb { background: #1e3448; border-radius: 3px; }
+
+.ad-edit-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px 16px;
+  border-bottom: 1px solid #1e3448;
+  position: sticky; top: 0;
+  background: #0f2236;
+  z-index: 1;
+}
+.ad-edit-header-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.ad-edit-header-icon {
+  width: 34px; height: 34px; border-radius: 6px;
+  background: rgba(0,168,224,0.12);
+  border: 1px solid rgba(0,168,224,0.25);
+  display: flex; align-items: center; justify-content: center;
+  color: #00a8e0;
+}
+.ad-edit-title {
+  font-size: 15px; font-weight: 800; color: #ffffff;
+  margin: 0; letter-spacing: 0.3px; text-transform: uppercase;
+}
+.ad-edit-subtitle {
+  font-size: 11px; color: #4a7090; font-weight: 500; margin-top: 1px;
+  text-transform: none; letter-spacing: 0;
+}
+.ad-edit-close {
+  background: #162636; border: 1px solid #1e3448;
+  font-size: 16px; cursor: pointer; color: #4a7090;
+  padding: 6px 10px; border-radius: 4px; line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.ad-edit-close:hover { background: #1e3448; color: #c8daea; }
+
+.ad-edit-form {
+  padding: 22px 24px 26px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+.ad-edit-field { display: flex; flex-direction: column; gap: 7px; }
+
+.ad-edit-label {
+  font-size: 11px; font-weight: 700; color: #4a7090;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ad-edit-label-required { color: #00a8e0; }
+
+.ad-edit-input, .ad-edit-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #1e3448;
+  border-radius: 5px;
+  font-size: 15px;
+  font-family: 'SolaimanLipi', 'Noto Sans Bengali', Arial, sans-serif;
+  color: #c8daea;
+  background: #0d1b2a;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+  box-sizing: border-box;
+  outline: none;
+}
+.ad-edit-input::placeholder, .ad-edit-textarea::placeholder { color: #2a4a64; }
+.ad-edit-input:focus, .ad-edit-textarea:focus {
+  border-color: #00a8e0;
+  box-shadow: 0 0 0 3px rgba(0,168,224,0.1);
+}
+.ad-edit-input:disabled, .ad-edit-textarea:disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
+.ad-edit-textarea { min-height: 240px; line-height: 1.7; }
+
+.ad-edit-divider {
+  height: 1px; background: #1e3448; margin: 2px 0;
+}
+
+.ad-edit-alert {
+  padding: 10px 14px; border-radius: 5px;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.ad-edit-alert-error {
+  background: rgba(192,57,43,0.12);
+  color: #ff8fa8;
+  border: 1px solid rgba(192,57,43,0.3);
+}
+.ad-edit-alert-success {
+  background: rgba(0,168,100,0.1);
+  color: #6dffd4;
+  border: 1px solid rgba(0,168,100,0.25);
+}
+
+.ad-edit-actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding-top: 6px; border-top: 1px solid #1e3448;
+  margin-top: 4px;
+}
+.ad-edit-btn-cancel {
+  padding: 9px 22px; border-radius: 5px;
+  border: 1.5px solid #1e3448;
+  background: transparent; color: #4a7090;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.ad-edit-btn-cancel:hover:not(:disabled) { border-color: #4a7090; color: #c8daea; background: #162636; }
+.ad-edit-btn-save {
+  padding: 9px 24px; border-radius: 5px; border: none;
+  background: #00a8e0; color: #fff;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s, transform 0.1s;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.ad-edit-btn-save:hover:not(:disabled) { background: #0090c8; transform: translateY(-1px); }
+.ad-edit-btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+@media (max-width: 600px) {
+  .ad-edit-modal { max-height: 95vh; }
+  .ad-edit-form { padding: 16px; }
+  .ad-edit-header { padding: 14px 16px; }
+}
