@@ -155,6 +155,7 @@ const HomePage = () => {
   };
 
   const getCardThumb = (article) => {
+    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
     if (article.videoUrl && article.videoUrl.trim() !== "") {
       const ytId = extractYouTubeId(article.videoUrl);
       if (ytId)
@@ -163,7 +164,6 @@ const HomePage = () => {
           isVideo: true,
         };
     }
-    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
     return null;
   };
 
@@ -232,10 +232,17 @@ const HomePage = () => {
               return media ? (
                 <div className="hp-hero-img">
                   <img src={media.src} alt={getTitle(hero)} />
-                  <div className="hp-hero-overlay" />
                   {media.isVideo && (
-                    <div className="hp-hero-play">
-                      <svg viewBox="0 0 24 24" width="56" height="56">
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%,-50%)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="64" height="64">
                         <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.5)" />
                         <polygon points="9.5,7 18,12 9.5,17" fill="white" />
                       </svg>

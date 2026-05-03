@@ -133,8 +133,7 @@
 a.hp-featured-card:hover,
 a.hp-grid-card:hover,
 a.hp-cat-lead:hover,
-a.hp-cat-small:hover,
-a.hp-hero-link:hover .hp-hero-img img {
+a.hp-cat-small:hover {
   transform: scale(1.03);
 }
 
@@ -150,27 +149,26 @@ a.hp-grid-card:hover .hp-card-title,
 a.hp-cat-lead:hover .hp-card-title,
 a.hp-cat-small:hover .hp-card-title,
 a.hp-hero-link:hover .hp-hero-title {
-  color: #ffffff;
+  color: #00a8e0;
 }
 
 /* ════ HERO ════ */
 .hp-hero {
-  position: relative;
   width: 100%;
-  max-height: 520px;
-  overflow: hidden;
   margin-bottom: 0;
 }
 
 .hp-hero-link {
   display: block;
   text-decoration: none;
-  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 .hp-hero-img {
   width: 100%;
-  height: 480px;
+  height: 440px;
   overflow: hidden;
   position: relative;
 }
@@ -180,48 +178,34 @@ a.hp-hero-link:hover .hp-hero-title {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
 }
 
 .hp-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(13,27,42,0) 30%,
-    rgba(13,27,42,0.7) 60%,
-    rgba(13,27,42,0.95) 100%
-  );
+  display: none;
 }
 
 .hp-hero-body {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 28px 28px;
+  padding: 16px 0 24px;
 }
 
 .hp-hero-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 900;
-  line-height: 1.25;
+  line-height: 1.3;
   color: #ffffff;
   margin: 6px 0 8px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .hp-hero-excerpt {
-  font-size: 15px;
-  color: rgba(255,255,255,0.8);
-  line-height: 1.55;
+  font-size: 14px;
+  color: #a0b4c8;
+  line-height: 1.6;
   margin: 0 0 8px;
-  max-width: 680px;
 }
 
 .hp-hero-date {
   font-size: 11px;
-  color: rgba(255,255,255,0.55);
+  color: #5a7a96;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -400,18 +384,17 @@ a.hp-hero-link:hover .hp-hero-title {
 @media (max-width: 991px) {
   .hp-layout { flex-direction: column; }
   .hp-main { width: 100%; }
-
   .hp-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .hp-hero-title { font-size: 26px; }
-  .hp-hero-img { height: 360px; }
+  .hp-hero-img { height: 340px; }
 }
 
 @media (max-width: 767px) {
   .hp-featured-row { grid-template-columns: 1fr; }
   .hp-cat-grid { grid-template-columns: 1fr; }
   .hp-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .hp-hero-img { height: 260px; }
   .hp-hero-title { font-size: 22px; }
-  .hp-hero-img { height: 280px; }
   .hp-hero-body { padding: 16px; }
   .hp-cat-small-img { width: 90px; }
 }
@@ -419,8 +402,8 @@ a.hp-hero-link:hover .hp-hero-title {
 @media (max-width: 576px) {
   .hp-grid-4 { grid-template-columns: 1fr; }
   .hp-grid-3 { grid-template-columns: 1fr; }
+  .hp-hero-img { height: 200px; }
   .hp-hero-title { font-size: 19px; }
-  .hp-hero-img { height: 220px; }
   .hp-cat-small { flex-direction: column; }
   .hp-cat-small-img { width: 100%; height: 140px; }
 }
@@ -463,7 +446,6 @@ a.hp-hero-link:hover .hp-hero-title {
 
 .cp-back-btn:hover { background: #0090c8; color: #fff; }
 
-/* ── Header ── */
 .cp-header {
   background: #0a1520;
   border-bottom: 1px solid #1e3448;
@@ -529,7 +511,6 @@ a.hp-hero-link:hover .hp-hero-title {
   letter-spacing: 0.4px;
 }
 
-/* ── Shared label ── */
 .cp-label {
   display: inline-block;
   font-size: 10px;
@@ -540,7 +521,6 @@ a.hp-hero-link:hover .hp-hero-title {
   margin-bottom: 7px;
 }
 
-/* ── Hero ── */
 .cp-hero {
   position: relative;
   width: 100%;
@@ -551,14 +531,15 @@ a.hp-hero-link:hover .hp-hero-title {
 .cp-hero-link {
   display: block;
   text-decoration: none;
-  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 .cp-hero-img {
   width: 100%;
   height: 440px;
   overflow: hidden;
-  position: relative;
 }
 
 .cp-hero-img img {
@@ -566,45 +547,31 @@ a.hp-hero-link:hover .hp-hero-title {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
 }
 
 .cp-hero-link:hover .cp-hero-img img { transform: scale(1.03); }
 
 .cp-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(13,27,42,0) 25%,
-    rgba(13,27,42,0.65) 55%,
-    rgba(13,27,42,0.97) 100%
-  );
+  display: none;
 }
 
 .cp-hero-body {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 28px 32px;
-  max-width: 860px;
+  padding: 16px 0 24px;
 }
 
 .cp-hero-title {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 900;
-  line-height: 1.25;
+  line-height: 1.3;
   color: #ffffff;
-  margin: 4px 0 10px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  margin: 6px 0 8px;
 }
 
 .cp-hero-excerpt {
-  font-size: 15px;
-  color: rgba(255,255,255,0.78);
+  font-size: 14px;
+  color: #a0b4c8;
   line-height: 1.6;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .cp-hero-meta {
@@ -615,20 +582,19 @@ a.hp-hero-link:hover .hp-hero-title {
 
 .cp-hero-author {
   font-size: 12px;
-  color: rgba(255,255,255,0.55);
+  color: #4a7090;
   font-style: italic;
   font-weight: 600;
 }
 
 .cp-hero-date {
   font-size: 11px;
-  color: rgba(255,255,255,0.45);
+  color: #5a7a96;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   font-weight: 600;
 }
 
-/* ── Grid ── */
 .cp-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -726,11 +692,7 @@ a.hp-hero-link:hover .hp-hero-title {
   white-space: nowrap;
 }
 
-/* ── Responsive ── */
 @media (max-width: 991px) {
-  .hp-layout { flex-direction: column; }
-  .hp-main { width: 100%; }
-
   .cp-grid { grid-template-columns: repeat(2, 1fr); }
   .cp-hero-img { height: 340px; }
   .cp-hero-title { font-size: 24px; }
@@ -748,6 +710,7 @@ a.hp-hero-link:hover .hp-hero-title {
   .cp-hero-img { height: 200px; }
   .cp-hero-title { font-size: 17px; }
 }
+
 /* ════════════════════════════════════
    VIDEO SECTION
 ════════════════════════════════════ */
@@ -817,18 +780,14 @@ a.hp-hero-link:hover .hp-hero-title {
   transition: background 0.2s;
 }
 
-.hp-video-card:hover .hp-video-play-btn {
-  background: rgba(0,0,0,0.3);
-}
+.hp-video-card:hover .hp-video-play-btn { background: rgba(0,0,0,0.3); }
 
 .hp-video-play-btn svg {
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
   transition: transform 0.2s;
 }
 
-.hp-video-card:hover .hp-video-play-btn svg {
-  transform: scale(1.15);
-}
+.hp-video-card:hover .hp-video-play-btn svg { transform: scale(1.15); }
 
 @media (max-width: 767px) {
   .hp-video-grid { grid-template-columns: repeat(2, 1fr); }
@@ -838,7 +797,6 @@ a.hp-hero-link:hover .hp-hero-title {
   .hp-video-grid { grid-template-columns: 1fr; }
 }
 
-/* ── Play icon overlay on video cards ── */
 .hp-card-play-icon {
   position: absolute;
   inset: 0;
@@ -855,9 +813,7 @@ a.hp-hero-link:hover .hp-hero-title {
   height: 26px;
 }
 
-a:hover .hp-card-play-icon {
-  background: rgba(0,0,0,0.25);
-}
+a:hover .hp-card-play-icon { background: rgba(0,0,0,0.25); }
 
 a:hover .hp-card-play-icon svg {
   transform: scale(1.12);

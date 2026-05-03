@@ -133,6 +133,7 @@ const CategoryPage = () => {
   };
 
   const getCardThumb = (article) => {
+    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
     if (article.videoUrl && article.videoUrl.trim() !== "") {
       const ytId = extractYouTubeId(article.videoUrl);
       if (ytId)
@@ -141,7 +142,6 @@ const CategoryPage = () => {
           isVideo: true,
         };
     }
-    if (article.thumbnail) return { src: article.thumbnail, isVideo: false };
     return null;
   };
 
@@ -232,7 +232,6 @@ const CategoryPage = () => {
               return media ? (
                 <div className="cp-hero-img">
                   <img src={media.src} alt={getTitle(hero)} />
-                  <div className="cp-hero-overlay" />
                   {media.isVideo && (
                     <div
                       style={{
