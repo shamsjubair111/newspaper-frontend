@@ -19,6 +19,8 @@ import AdminUsers from './Pages/AdminUsers';
 import AdminArticles from './Pages/AdminArticles';
 import AdminCategories from './Pages/AdminCategories';
 import AdminSubcategories from './Pages/AdminSubcategories';
+import AdminAuthors from './Pages/AdminAuthors';
+import AuthorForm from './components/AuthorForm';
 import CategoryPage from './Pages/CategoryPage';
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
           <Route path="/admin/articles" element={<AdminArticles />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/subcategories" element={<AdminSubcategories />} />
+          <Route path="/admin/authors" element={<AdminAuthors />} />
+          <Route path="/create-author" element={<AuthorForm />} />
           {/* Wildcard category routes — MUST be absolutely last */}
           <Route path="/:categoryName/:subcategoryName" element={<CategoryPage />} />
           <Route path="/:categoryName" element={<CategoryPage />} />

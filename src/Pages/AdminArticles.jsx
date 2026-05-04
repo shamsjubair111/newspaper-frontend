@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authAPI } from "../services/api";
+import { authAPI, authorAPI } from "../services/api";
 
 const AdminArticles = () => {
   const [articles, setArticles] = useState([]);
@@ -8,6 +8,10 @@ const AdminArticles = () => {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [authors, setAuthors] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({ articleAuthor: "" });
+  const [editLoading, setEditLoading] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
@@ -22,6 +26,7 @@ const AdminArticles = () => {
       return;
     }
     fetchArticles();
+    fetchAuthors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -31,13 +36,69 @@ const AdminArticles = () => {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/articles`);
       if (!res.ok) throw new Error("Failed to fetch articles");
       const data = await res.json();
-      // Sort newest first
       data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setArticles(data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAuthors = async () => {
+    try {
+      setAuthors(await authorAPI.getAuthors());
+    } catch (err) {
+      console.error("Error fetching authors:", err);
+    }
+  };
+
+  const startEdit = (article) => {
+    setEditingId(article._id);
+    setEditData({ articleAuthor: article.articleAuthor?._id || "" });
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditData({ articleAuthor: "" });
+  };
+
+  const handleEditSave = async (articleId, title) => {
+    if (!editData.articleAuthor) {
+      setError("Please select an author.");
+      return;
+    }
+    setEditLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/articles/${articleId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ articleAuthor: editData.articleAuthor }),
+        },
+      );
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.message || "Update failed");
+      }
+      const fullAuthor = authors.find((a) => a._id === editData.articleAuthor);
+      setArticles((prev) =>
+        prev.map((a) =>
+          a._id === articleId ? { ...a, articleAuthor: fullAuthor } : a,
+        ),
+      );
+      setSuccessMsg(`"${title}" author updated.`);
+      setTimeout(() => setSuccessMsg(""), 3000);
+      cancelEdit();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -77,20 +138,19 @@ const AdminArticles = () => {
   const filtered = articles.filter(
     (a) =>
       a.title?.toLowerCase().includes(search.toLowerCase()) ||
-      a.authorName?.toLowerCase().includes(search.toLowerCase()) ||
+      a.articleAuthor?.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.category?.name?.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (loading)
     return (
       <div className="container py-5 text-center">
-        <div className="spinner-border text-primary" role="status" />
+        <div className="spinner-border text-primary" />
       </div>
     );
 
   return (
     <div className="container py-4">
-      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h2 className="mb-0">Article Management</h2>
@@ -101,7 +161,6 @@ const AdminArticles = () => {
       {error && <div className="alert alert-danger">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
-      {/* Search */}
       <div className="mb-3">
         <input
           type="text"
@@ -173,7 +232,58 @@ const AdminArticles = () => {
                       </div>
                     </td>
                     <td className="small">
-                      {article.authorName || article.author?.name || "—"}
+                      {editingId === article._id ? (
+                        <div
+                          className="d-flex gap-1 align-items-center"
+                          style={{ minWidth: 220 }}
+                        >
+                          <select
+                            className="form-select form-select-sm"
+                            value={editData.articleAuthor}
+                            onChange={(e) =>
+                              setEditData({ articleAuthor: e.target.value })
+                            }
+                            disabled={editLoading}
+                          >
+                            <option value="">-- Select Author --</option>
+                            {authors.map((a) => (
+                              <option key={a._id} value={a._id}>
+                                {a.name} — {a.profession}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() =>
+                              handleEditSave(article._id, article.title)
+                            }
+                            disabled={editLoading}
+                          >
+                            {editLoading ? "..." : "✓"}
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={cancelEdit}
+                            disabled={editLoading}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          role="button"
+                          title="Click to change author"
+                          onClick={() => startEdit(article)}
+                          style={{
+                            cursor: "pointer",
+                            borderBottom: "1px dashed #adb5bd",
+                          }}
+                        >
+                          {article.articleAuthor?.name ||
+                            article.author?.name ||
+                            "—"}
+                        </span>
+                      )}
                     </td>
                     <td>
                       {article.category?.name ? (
@@ -201,7 +311,6 @@ const AdminArticles = () => {
                         <Link
                           to={`/article/${article._id}`}
                           className="btn btn-sm btn-outline-primary"
-                          title="View"
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -213,7 +322,6 @@ const AdminArticles = () => {
                             handleDelete(article._id, article.title)
                           }
                           disabled={deletingId === article._id}
-                          title="Delete"
                         >
                           {deletingId === article._id ? "..." : "Delete"}
                         </button>
