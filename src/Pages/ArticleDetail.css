@@ -430,3 +430,75 @@
   .ad-edit-form { padding: 16px; }
   .ad-edit-header { padding: 14px 16px; }
 }
+
+/* ── Author Card ── */
+.ad-author-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #162636;
+  border: 1px solid #1e3448;
+  border-left: 4px solid #00a8e0;
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin: 32px 0;
+}
+
+.ad-author-card-left { flex-shrink: 0; }
+
+.ad-author-card-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00a8e0;
+  display: block;
+}
+
+.ad-author-card-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 20px;
+  border: 2px solid #00a8e0;
+}
+
+.ad-author-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ad-author-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #00a8e0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ad-author-card-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'SolaimanLipi', 'Noto Sans Bengali', Arial, sans-serif;
+}
+
+.ad-author-card-profession {
+  font-size: 12px;
+  color: #4a7090;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+@media (max-width: 600px) {
+  .ad-author-card { padding: 14px 16px; gap: 12px; }
+  .ad-author-card-img,
+  .ad-author-card-avatar { width: 48px; height: 48px; font-size: 16px; }
+}

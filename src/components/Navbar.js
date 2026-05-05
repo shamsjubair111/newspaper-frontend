@@ -18,14 +18,13 @@ const NavigationBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null); // category._id
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [translatedCatNames, setTranslatedCatNames] = useState({});
   const [translatedSubNames, setTranslatedSubNames] = useState({});
   const [currentTime, setCurrentTime] = useState('');
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
-  // Geolocation-based timezone detection
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -46,7 +45,6 @@ const NavigationBar = () => {
     }
   }, []);
 
-  // Live clock ticker
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -64,9 +62,6 @@ const NavigationBar = () => {
     return () => clearInterval(interval);
   }, [timezone]);
 
-
-
-  // Translate category and subcategory names when language is English
   useEffect(() => {
     if (lang === 'bn' || categories.length === 0) {
       setTranslatedCatNames({});
@@ -115,7 +110,6 @@ const NavigationBar = () => {
     return `${dayName}, ${toBn(date.getDate())} ${month} ${toBn(date.getFullYear())}`;
   };
 
-  // Build category URL using name (Bengali)
   const catUrl = (cat) => `/${encodeURIComponent(cat.name)}`;
   const subUrl = (cat, sub) => `/${encodeURIComponent(cat.name)}/${encodeURIComponent(sub.name)}`;
 
@@ -140,9 +134,7 @@ const NavigationBar = () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/articles?search=${encodeURIComponent(q.trim())}`);
       const data = await res.json();
-      // data may be array directly or { articles: [] } depending on your API
       const list = Array.isArray(data) ? data : (data.articles || []);
-      // client-side filter by title as fallback
       const filtered = list.filter(a =>
         a.title?.toLowerCase().includes(q.toLowerCase()) ||
         a.title?.includes(q)
@@ -163,7 +155,6 @@ const NavigationBar = () => {
   const handleSearchKeyDown = (e) => {
     if (e.key === 'Escape') handleSearchClose();
   };
-
 
   return (
     <header className="protichinta-header">
@@ -193,7 +184,6 @@ const NavigationBar = () => {
               </button>
             </div>
 
-            {/* Results */}
             <div className="search-results">
               {searchLoading && (
                 <div className="search-status">{t('searchLoading')}</div>
@@ -220,10 +210,10 @@ const NavigationBar = () => {
               ))}
             </div>
           </div>
-          {/* Click outside to close */}
           <div className="search-overlay-backdrop" onClick={handleSearchClose} />
         </div>
       )}
+
       {/* Top Bar */}
       <div className="top-bar">
         <div className="container">
@@ -242,8 +232,6 @@ const NavigationBar = () => {
                   <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               </button>
-
-
             </div>
 
             {/* Center: Logo + Date */}
@@ -268,201 +256,208 @@ const NavigationBar = () => {
               >
                 {lang === 'bn' ? 'EN' : 'বাং'}
               </button>
+
               {user ? (
                 <div className="d-flex align-items-center gap-2">
-                <div className="dropdown">
-                  <button className="login-btn dropdown-toggle" data-bs-toggle="dropdown">
-                    {user.name}
-                  </button>
-                  <ul className="dropdown-menu dropdown-menu-end">
-                    <li>
-                      <span className="dropdown-item-text">
-                        <strong>{user.name}</strong>
-                        <br />
-                        <small className="text-muted">{user.email}</small>
-                        <br />
-                        <span className={`badge mt-1 ${user.role === 'admin' ? 'bg-danger' : user.role === 'author' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
-                          {user.role}
+                  <div className="dropdown">
+                    <button className="login-btn dropdown-toggle" data-bs-toggle="dropdown">
+                      {user.name}
+                    </button>
+                    <ul className="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <span className="dropdown-item-text">
+                          <strong>{user.name}</strong>
+                          <br />
+                          <small className="text-muted">{user.email}</small>
+                          <br />
+                          <span className={`badge mt-1 ${user.role === 'admin' ? 'bg-danger' : user.role === 'author' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
+                            {user.role}
+                          </span>
                         </span>
-                      </span>
-                    </li>
-                    <li><hr className="dropdown-divider" /></li>
+                      </li>
+                      <li><hr className="dropdown-divider" /></li>
 
-                    {/* Admin links */}
-                    {user.role === 'admin' && (
-                      <>
-                        <li><Link className="dropdown-item" to="/admin/users">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-                          </svg>
-                          {t('manageUsers')}
-                        </Link></li>
-                        <li><Link className="dropdown-item" to="/admin/articles">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-                          </svg>
-                          {t('manageArticles')}
-                        </Link></li>
-                        <li><Link className="dropdown-item" to="/admin/categories">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                          </svg>
-                          {t('manageCategories')}
-                        </Link></li>
-                        <li><Link className="dropdown-item" to="/admin/subcategories">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
-                          </svg>
-                          {t('manageSubcategories')}
-                        </Link></li>
-                        <li><hr className="dropdown-divider" /></li>
-                      </>
-                    )}
+                      {/* Admin links */}
+                      {user.role === 'admin' && (
+                        <>
+                          <li><Link className="dropdown-item" to="/admin/users">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                            </svg>
+                            {t('manageUsers')}
+                          </Link></li>
+                          <li><Link className="dropdown-item" to="/admin/articles">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            {t('manageArticles')}
+                          </Link></li>
+                          <li><Link className="dropdown-item" to="/admin/categories">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            </svg>
+                            {t('manageCategories')}
+                          </Link></li>
+                          <li><Link className="dropdown-item" to="/admin/subcategories">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+                            </svg>
+                            {t('manageSubcategories')}
+                          </Link></li>
 
-                    {/* Author / Admin links */}
-                    {(user.role === 'author' || user.role === 'admin') && (
-                      <>
-                        <li><Link className="dropdown-item" to="/create-article">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                          {t('createArticle')}
-                        </Link></li>
-                        <li><hr className="dropdown-divider" /></li>
-                      </>
-                    )}
+                          {/* ✅ ADDED: Manage Authors */}
+                          <li><Link className="dropdown-item" to="/admin/authors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                            </svg>
+                            Manage Authors
+                          </Link></li>
 
-                    {/* All logged-in users */}
-                    <li><Link className="dropdown-item" to="/my-bookmarks">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-                      </svg>
-                      {t('myBookmarks')}
-                    </Link></li>
-                    <li><Link className="dropdown-item" to="/my-comments">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                      </svg>
-                      {t('myComments')}
-                    </Link></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li>
-                      <button className="dropdown-item text-danger" onClick={handleLogout}>
+                          <li><hr className="dropdown-divider" /></li>
+                        </>
+                      )}
+
+                      {/* Author / Admin links */}
+                      {(user.role === 'author' || user.role === 'admin') && (
+                        <>
+                          <li><Link className="dropdown-item" to="/create-article">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            {t('createArticle')}
+                          </Link></li>
+                          <li><hr className="dropdown-divider" /></li>
+                        </>
+                      )}
+
+                      {/* All logged-in users */}
+                      <li><Link className="dropdown-item" to="/my-bookmarks">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
                         </svg>
-                        {t('logout')}
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                        {t('myBookmarks')}
+                      </Link></li>
+                      <li><Link className="dropdown-item" to="/my-comments">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                        </svg>
+                        {t('myComments')}
+                      </Link></li>
+                      <li><hr className="dropdown-divider" /></li>
+                      <li>
+                        <button className="dropdown-item text-danger" onClick={handleLogout}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                          </svg>
+                          {t('logout')}
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               ) : (
                 <Link to="/login">
                   <button className="login-btn">{t('login')}</button>
                 </Link>
               )}
-
             </div>
           </div>
-
-
         </div>
       </div>
 
       {/* Desktop Navigation Menu */}
       <nav className="main-nav">
         <div className="nav-scroll-wrapper">
-        <div className="d-flex justify-content-center">
-          {loading ? (
-            <div className="loading-menu">Loading...</div>
-          ) : (
-            <>
-              {/* Desktop Menu */}
-              <ul className="nav-menu desktop-menu">
-                {categories.map((category) => {
-                  const categorySubs = getSubcategoriesForCategory(category._id);
-                  const hasSubs = categorySubs.length > 0;
-                  return (
-                    <li
-                      key={category._id}
-                      className={`nav-item ${hasSubs ? 'has-dropdown' : ''}`}
-                      onMouseEnter={(e) => {
-                        if (!hasSubs) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setDropdownPos({ top: rect.bottom, left: rect.left });
-                        setOpenDropdown(category._id);
-                      }}
-                      onMouseLeave={() => setOpenDropdown(null)}
-                    >
-                      <Link to={catUrl(category)} style={{ fontWeight: 'bold' }} className="nav-link">
-                        {getCatName(category)}
-                      </Link>
-                      {hasSubs && openDropdown === category._id && (
-                        <ul
-                          className="dropdown-submenu"
-                          style={{ top: dropdownPos.top, left: dropdownPos.left, display: 'block' }}
-                          onMouseEnter={() => setOpenDropdown(category._id)}
-                          onMouseLeave={() => setOpenDropdown(null)}
-                        >
-                          {categorySubs.map((sub) => (
-                            <li key={sub._id}>
-                              <Link
-                                to={subUrl(category, sub)}
-                                style={{ fontWeight: 'bold' }}
-                                className="submenu-link"
-                                onClick={() => setOpenDropdown(null)}
-                              >
-                                {getSubName(sub)}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {/* Mobile Menu */}
-              {mobileMenuOpen && (
-                <div className="mobile-menu">
+          <div className="d-flex justify-content-center">
+            {loading ? (
+              <div className="loading-menu">Loading...</div>
+            ) : (
+              <>
+                {/* Desktop Menu */}
+                <ul className="nav-menu desktop-menu">
                   {categories.map((category) => {
                     const categorySubs = getSubcategoriesForCategory(category._id);
                     const hasSubs = categorySubs.length > 0;
                     return (
-                      <div key={category._id} className="mobile-nav-item">
-                        <Link
-                          to={catUrl(category)}
-                          className="mobile-nav-link"
-                          onClick={() => !hasSubs && setMobileMenuOpen(false)}
-                        >
+                      <li
+                        key={category._id}
+                        className={`nav-item ${hasSubs ? 'has-dropdown' : ''}`}
+                        onMouseEnter={(e) => {
+                          if (!hasSubs) return;
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setDropdownPos({ top: rect.bottom, left: rect.left });
+                          setOpenDropdown(category._id);
+                        }}
+                        onMouseLeave={() => setOpenDropdown(null)}
+                      >
+                        <Link to={catUrl(category)} style={{ fontWeight: 'bold' }} className="nav-link">
                           {getCatName(category)}
                         </Link>
-                        {hasSubs && (
-                          <div className="mobile-submenu">
+                        {hasSubs && openDropdown === category._id && (
+                          <ul
+                            className="dropdown-submenu"
+                            style={{ top: dropdownPos.top, left: dropdownPos.left, display: 'block' }}
+                            onMouseEnter={() => setOpenDropdown(category._id)}
+                            onMouseLeave={() => setOpenDropdown(null)}
+                          >
                             {categorySubs.map((sub) => (
-                              <Link
-                                key={sub._id}
-                                to={subUrl(category, sub)}
-                                className="mobile-submenu-link"
-                                onClick={() => setMobileMenuOpen(false)}
-                              >
-                                {getSubName(sub)}
-                              </Link>
+                              <li key={sub._id}>
+                                <Link
+                                  to={subUrl(category, sub)}
+                                  style={{ fontWeight: 'bold' }}
+                                  className="submenu-link"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  {getSubName(sub)}
+                                </Link>
+                              </li>
                             ))}
-                          </div>
+                          </ul>
                         )}
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
-              )}
-            </>
-          )}
-        </div>
+                </ul>
+
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                  <div className="mobile-menu">
+                    {categories.map((category) => {
+                      const categorySubs = getSubcategoriesForCategory(category._id);
+                      const hasSubs = categorySubs.length > 0;
+                      return (
+                        <div key={category._id} className="mobile-nav-item">
+                          <Link
+                            to={catUrl(category)}
+                            className="mobile-nav-link"
+                            onClick={() => !hasSubs && setMobileMenuOpen(false)}
+                          >
+                            {getCatName(category)}
+                          </Link>
+                          {hasSubs && (
+                            <div className="mobile-submenu">
+                              {categorySubs.map((sub) => (
+                                <Link
+                                  key={sub._id}
+                                  to={subUrl(category, sub)}
+                                  className="mobile-submenu-link"
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  {getSubName(sub)}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </nav>
     </header>

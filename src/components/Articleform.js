@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { authAPI, authorAPI } from '../services/api';
 
-// Converts plain text with line breaks into HTML paragraphs.
-// Each blank-line-separated block becomes a <p>. Single line breaks become <br>.
-// If the content already contains HTML tags, it is returned as-is.
 const plainTextToHtml = (text) => {
   if (!text) return '';
-  // If it already has HTML tags, don't double-convert
   if (/<[a-z][\s\S]*>/i.test(text)) return text;
   return text
-    .split(/\n\s*\n/)                          // split on blank lines → paragraphs
+    .split(/\n\s*\n/)
     .map(para => para.trim())
     .filter(para => para.length > 0)
-    .map(para => `<p>${para.replace(/\n/g, '<br />')}</p>`) // single newlines → <br>
+    .map(para => `<p>${para.replace(/\n/g, '<br />')}</p>`)
     .join('\n');
 };
 
@@ -22,7 +18,7 @@ const ArticleForm = () => {
   const user = authAPI.getCurrentUser();
   const [formData, setFormData] = useState({
     title: '',
-    authorName: '',
+    articleAuthor: '',
     content: '',
     thumbnail: '',
     videoUrl: '',
@@ -36,19 +32,18 @@ const ArticleForm = () => {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [articles, setArticles] = useState([]);
   const [isAuthorOrAdmin, setIsAuthorOrAdmin] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    if (!user) { navigate('/login'); return; }
     if (user.role !== 'author' && user.role !== 'admin') {
       setError('Only authors and admins can create articles');
       setIsAuthorOrAdmin(false);
     } else {
       setIsAuthorOrAdmin(true);
+      fetchAuthors();
       fetchCategories();
       fetchSubcategories();
       fetchArticles();
@@ -58,58 +53,51 @@ const ArticleForm = () => {
 
   useEffect(() => {
     if (formData.category) {
-      const filtered = subcategories.filter(
+      setFilteredSubcategories(subcategories.filter(
         sub => sub.category === formData.category || sub.category?._id === formData.category
-      );
-      setFilteredSubcategories(filtered);
+      ));
     } else {
       setFilteredSubcategories([]);
     }
   }, [formData.category, subcategories]);
 
+  const fetchAuthors = async () => {
+    try {
+      const data = await authorAPI.getAuthors();
+      setAuthors(data);
+    } catch (err) {
+      console.error('Error fetching authors:', err);
+    }
+  };
+
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/categories`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/categories`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data);
-      }
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
+      if (res.ok) setCategories(await res.json());
+    } catch (err) { console.error(err); }
   };
 
   const fetchSubcategories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/subcategories`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/subcategories`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setSubcategories(data);
-      }
-    } catch (err) {
-      console.error('Error fetching subcategories:', err);
-    }
+      if (res.ok) setSubcategories(await res.json());
+    } catch (err) { console.error(err); }
   };
 
   const fetchArticles = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/articles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setArticles(data);
-      }
-    } catch (err) {
-      console.error('Error fetching articles:', err);
-    }
+      if (res.ok) setArticles(await res.json());
+    } catch (err) { console.error(err); }
   };
 
   const handleChange = (e) => {
@@ -123,82 +111,48 @@ const ArticleForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-
+    setError(''); setSuccess(''); setLoading(true);
     try {
       const token = localStorage.getItem('token');
-
       const payload = {
         title: formData.title,
-        authorName: formData.authorName,
+        articleAuthor: formData.articleAuthor,
         content: plainTextToHtml(formData.content),
         thumbnail: formData.thumbnail,
         videoUrl: formData.videoUrl || '',
         category: formData.category,
         slayout: formData.slayout,
+        ...(formData.subcategory && { subcategory: formData.subcategory }),
       };
-
-      if (formData.subcategory) {
-        payload.subcategory = formData.subcategory;
-      }
-
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/articles`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create article');
-      }
-
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to create article');
       setSuccess(`"${formData.title}" article created successfully!`);
       setFormData({
-        title: '',
-        authorName: '',
-        content: '',
-        thumbnail: '',
-        videoUrl: '',
-        category: '',
-        subcategory: '',
-        slayout: 'default'
+        title: '', articleAuthor: '', content: '', thumbnail: '',
+        videoUrl: '', category: '', subcategory: '', slayout: 'default'
       });
-
       fetchArticles();
-
     } catch (err) {
       setError(err.message || 'Failed to create article. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  if (!isAuthorOrAdmin) {
-    return (
-      <div className="container py-5">
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <div className="card text-center">
-              <div className="card-body">
-                <h3 className="text-danger mb-3">Access Denied</h3>
-                <p className="mb-4">Only authors and admins can create articles.</p>
-                <button className="btn btn-primary" onClick={() => navigate('/')}>
-                  Go to Home
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!isAuthorOrAdmin) return (
+    <div className="container py-5">
+      <div className="row justify-content-center"><div className="col-md-6">
+        <div className="card text-center"><div className="card-body">
+          <h3 className="text-danger mb-3">Access Denied</h3>
+          <p className="mb-4">Only authors and admins can create articles.</p>
+          <button className="btn btn-primary" onClick={() => navigate('/')}>Go to Home</button>
+        </div></div>
+      </div></div>
+    </div>
+  );
 
   return (
     <div className="container py-5">
@@ -209,9 +163,8 @@ const ArticleForm = () => {
               <h4 className="mb-0">আর্টিকেল যুক্ত করুন / Create New Article</h4>
               <p className="mb-0 opacity-75">Write and publish your article</p>
             </div>
-
             <div className="card-body p-4">
-              {error && <div className="alert alert-danger">{error}</div>}
+              {error   && <div className="alert alert-danger">{error}</div>}
               {success && <div className="alert alert-success">{success}</div>}
               {categories.length === 0 && (
                 <div className="alert alert-warning">
@@ -227,34 +180,33 @@ const ArticleForm = () => {
                     Article Title / শিরোনাম <span className="text-danger">*</span>
                   </label>
                   <input
-                    type="text"
-                    className="form-control form-control-lg"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g., বাংলাদেশের অর্থনীতিতে নতুন দিগন্ত"
-                    disabled={loading}
+                    type="text" className="form-control form-control-lg"
+                    id="title" name="title" value={formData.title}
+                    onChange={handleChange} required
+                    placeholder="e.g., বাংলাদেশের অর্থনীতিতে নতুন দিগন্ত" disabled={loading}
                   />
                 </div>
 
-                {/* Author Name */}
+                {/* Author dropdown */}
                 <div className="mb-4">
-                  <label htmlFor="authorName" className="form-label fw-bold">
-                    Author Name / লেখকের নাম <span className="text-danger">*</span>
+                  <label htmlFor="articleAuthor" className="form-label fw-bold">
+                    Article Author / লেখক <span className="text-danger">*</span>
                   </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="authorName"
-                    name="authorName"
-                    value={formData.authorName}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g., বদরুল আলম খান"
-                    disabled={loading}
-                  />
+                  <select
+                    className="form-select" id="articleAuthor" name="articleAuthor"
+                    value={formData.articleAuthor} onChange={handleChange}
+                    required disabled={loading || authors.length === 0}
+                  >
+                    <option value="">-- Select Author --</option>
+                    {authors.map(a => (
+                      <option key={a._id} value={a._id}>{a.name} — {a.profession}</option>
+                    ))}
+                  </select>
+                  {authors.length === 0 && (
+                    <div className="form-text text-warning">
+                      No authors found. <a href="/create-author">Create an author</a> first.
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -263,34 +215,24 @@ const ArticleForm = () => {
                     Article Content / কন্টেন্ট <span className="text-danger">*</span>
                   </label>
                   <textarea
-                    className="form-control"
-                    id="content"
-                    name="content"
-                    value={formData.content}
-                    onChange={handleChange}
-                    required
-                    rows="12"
-                    placeholder="Write your article content here. Separate paragraphs with a blank line. Line breaks are preserved automatically."
+                    className="form-control" id="content" name="content"
+                    value={formData.content} onChange={handleChange}
+                    required rows="12"
+                    placeholder="Write your article content here. Separate paragraphs with a blank line."
                     disabled={loading}
                   />
                   <div className="form-text">Separate paragraphs with a blank line. Single line breaks become &lt;br&gt;. HTML tags also supported.</div>
                 </div>
 
-                {/* Thumbnail URL */}
+                {/* Thumbnail */}
                 <div className="mb-4">
                   <label htmlFor="thumbnail" className="form-label fw-bold">
                     Thumbnail Image URL <span className="text-danger">*</span>
                   </label>
                   <input
-                    type="url"
-                    className="form-control"
-                    id="thumbnail"
-                    name="thumbnail"
-                    value={formData.thumbnail}
-                    onChange={handleChange}
-                    required
-                    placeholder="https://example.com/image.jpg"
-                    disabled={loading}
+                    type="url" className="form-control" id="thumbnail" name="thumbnail"
+                    value={formData.thumbnail} onChange={handleChange} required
+                    placeholder="https://example.com/image.jpg" disabled={loading}
                   />
                   <div className="form-text">URL of the thumbnail image for this article</div>
                 </div>
@@ -301,14 +243,9 @@ const ArticleForm = () => {
                     Video URL <span className="text-muted">(Optional — YouTube or direct video link)</span>
                   </label>
                   <input
-                    type="url"
-                    className="form-control"
-                    id="videoUrl"
-                    name="videoUrl"
-                    value={formData.videoUrl}
-                    onChange={handleChange}
-                    placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4"
-                    disabled={loading}
+                    type="url" className="form-control" id="videoUrl" name="videoUrl"
+                    value={formData.videoUrl} onChange={handleChange}
+                    placeholder="https://www.youtube.com/watch?v=..." disabled={loading}
                   />
                   <div className="form-text">If provided, the video will be shown on the article page instead of the thumbnail image.</div>
                 </div>
@@ -320,13 +257,9 @@ const ArticleForm = () => {
                       Category / ক্যাটাগরি <span className="text-danger">*</span>
                     </label>
                     <select
-                      className="form-select"
-                      id="category"
-                      name="category"
-                      value={formData.category}
-                      onChange={handleChange}
-                      required
-                      disabled={loading || categories.length === 0}
+                      className="form-select" id="category" name="category"
+                      value={formData.category} onChange={handleChange}
+                      required disabled={loading || categories.length === 0}
                     >
                       <option value="">-- Select Category --</option>
                       {categories.map(cat => (
@@ -334,17 +267,13 @@ const ArticleForm = () => {
                       ))}
                     </select>
                   </div>
-
                   <div className="col-md-6">
                     <label htmlFor="subcategory" className="form-label fw-bold">
                       Subcategory / সাবক্যাটাগরি <span className="text-muted">(Optional)</span>
                     </label>
                     <select
-                      className="form-select"
-                      id="subcategory"
-                      name="subcategory"
-                      value={formData.subcategory}
-                      onChange={handleChange}
+                      className="form-select" id="subcategory" name="subcategory"
+                      value={formData.subcategory} onChange={handleChange}
                       disabled={loading || !formData.category || filteredSubcategories.length === 0}
                     >
                       <option value="">-- Select Subcategory (Optional) --</option>
@@ -362,12 +291,8 @@ const ArticleForm = () => {
                 <div className="mb-4">
                   <label htmlFor="slayout" className="form-label fw-bold">Layout Style</label>
                   <select
-                    className="form-select"
-                    id="slayout"
-                    name="slayout"
-                    value={formData.slayout}
-                    onChange={handleChange}
-                    disabled={loading}
+                    className="form-select" id="slayout" name="slayout"
+                    value={formData.slayout} onChange={handleChange} disabled={loading}
                   >
                     <option value="default">Default</option>
                     <option value="featured">Featured</option>
@@ -376,35 +301,22 @@ const ArticleForm = () => {
                   </select>
                 </div>
 
-                {/* Buttons */}
                 <div className="d-flex gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={() => navigate('/')}
-                    disabled={loading}
-                  >
+                  <button type="button" className="btn btn-outline-secondary"
+                    onClick={() => navigate('/')} disabled={loading}>
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary flex-grow-1"
+                  <button type="submit" className="btn btn-primary flex-grow-1"
                     disabled={
-                      loading ||
-                      !formData.title.trim() ||
-                      !formData.authorName.trim() ||
-                      !formData.content.trim() ||
-                      !formData.thumbnail.trim() ||
-                      !formData.category ||
-                      categories.length === 0
+                      loading || !formData.title.trim() || !formData.articleAuthor ||
+                      !formData.content.trim() || !formData.thumbnail.trim() ||
+                      !formData.category || categories.length === 0
                     }
                   >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Publishing...
-                      </>
-                    ) : 'Publish Article'}
+                    {loading
+                      ? <><span className="spinner-border spinner-border-sm me-2" />Publishing...</>
+                      : 'Publish Article'
+                    }
                   </button>
                 </div>
 
@@ -435,9 +347,9 @@ const ArticleForm = () => {
                               {new Date(article.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          {article.authorName && (
+                          {article.articleAuthor?.name && (
                             <p className="card-text text-muted small mb-2">
-                              By: {article.authorName}
+                              By: {article.articleAuthor.name}
                             </p>
                           )}
                           <div className="d-flex gap-2 flex-wrap">
