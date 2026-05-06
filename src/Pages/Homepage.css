@@ -168,7 +168,7 @@ a.hp-hero-link:hover .hp-hero-title {
 
 .hp-hero-img {
   width: 100%;
-  height: 440px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   position: relative;
 }
@@ -386,14 +386,12 @@ a.hp-hero-link:hover .hp-hero-title {
   .hp-main { width: 100%; }
   .hp-grid-4 { grid-template-columns: repeat(2, 1fr); }
   .hp-hero-title { font-size: 26px; }
-  .hp-hero-img { height: 340px; }
 }
 
 @media (max-width: 767px) {
   .hp-featured-row { grid-template-columns: 1fr; }
   .hp-cat-grid { grid-template-columns: 1fr; }
   .hp-grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .hp-hero-img { height: 260px; }
   .hp-hero-title { font-size: 22px; }
   .hp-hero-body { padding: 16px; }
   .hp-cat-small-img { width: 90px; }
@@ -402,7 +400,6 @@ a.hp-hero-link:hover .hp-hero-title {
 @media (max-width: 576px) {
   .hp-grid-4 { grid-template-columns: 1fr; }
   .hp-grid-3 { grid-template-columns: 1fr; }
-  .hp-hero-img { height: 200px; }
   .hp-hero-title { font-size: 19px; }
   .hp-cat-small { flex-direction: column; }
   .hp-cat-small-img { width: 100%; height: 140px; }
@@ -538,7 +535,7 @@ a.hp-hero-link:hover .hp-hero-title {
 
 .cp-hero-img {
   width: 100%;
-  height: 440px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
@@ -694,12 +691,10 @@ a.hp-hero-link:hover .hp-hero-title {
 
 @media (max-width: 991px) {
   .cp-grid { grid-template-columns: repeat(2, 1fr); }
-  .cp-hero-img { height: 340px; }
   .cp-hero-title { font-size: 24px; }
 }
 
 @media (max-width: 767px) {
-  .cp-hero-img { height: 260px; }
   .cp-hero-title { font-size: 20px; }
   .cp-hero-body { padding: 16px; }
   .cp-title { font-size: 20px; }
@@ -707,7 +702,6 @@ a.hp-hero-link:hover .hp-hero-title {
 
 @media (max-width: 576px) {
   .cp-grid { grid-template-columns: 1fr; }
-  .cp-hero-img { height: 200px; }
   .cp-hero-title { font-size: 17px; }
 }
 
