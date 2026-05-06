@@ -313,6 +313,36 @@ const ArticleDetail = () => {
           <h1 className="ad-title">{displayArticle?.title || article.title}</h1>
           <div className="ad-title-divider" />
 
+          {/* ✅ Author card — moved here, below title */}
+          {articleAuthor && (
+            <div className="ad-author-card">
+              <div className="ad-author-card-left">
+                {articleAuthor.image ? (
+                  <img
+                    src={articleAuthor.image}
+                    alt={articleAuthor.name}
+                    className="ad-author-card-img"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div
+                    className="ad-author-card-avatar"
+                    style={{ background: getAvatarColor(articleAuthor.name) }}
+                  >
+                    {getInitials(articleAuthor.name)}
+                  </div>
+                )}
+              </div>
+              <div className="ad-author-card-info">
+                {/* ✅ লেখক পরিচিতি label removed */}
+                <div className="ad-author-card-name">{articleAuthor.name}</div>
+                {articleAuthor.profession && (
+                  <div className="ad-author-card-profession">{articleAuthor.profession}</div>
+                )}
+              </div>
+            </div>
+          )}
+
           {bookmarkMsg && (
             <div className={`ad-bookmark-toast ${isBookmarked ? 'ad-bookmark-toast-success' : 'ad-bookmark-toast-removed'}`}>
               {bookmarkMsg}
@@ -413,36 +443,6 @@ const ArticleDetail = () => {
             style={{ fontSize: `${fontSize}px`, opacity: (lang === 'en' && translating) ? 0.3 : 1, transition: 'opacity 0.3s' }}
             dangerouslySetInnerHTML={{ __html: displayArticle?.content || article.content }}
           />
-
-          {/* Author card */}
-          {articleAuthor && (
-            <div className="ad-author-card">
-              <div className="ad-author-card-left">
-                {articleAuthor.image ? (
-                  <img
-                    src={articleAuthor.image}
-                    alt={articleAuthor.name}
-                    className="ad-author-card-img"
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div
-                    className="ad-author-card-avatar"
-                    style={{ background: getAvatarColor(articleAuthor.name) }}
-                  >
-                    {getInitials(articleAuthor.name)}
-                  </div>
-                )}
-              </div>
-              <div className="ad-author-card-info">
-                <div className="ad-author-card-label">লেখক পরিচিতি</div>
-                <div className="ad-author-card-name">{articleAuthor.name}</div>
-                {articleAuthor.profession && (
-                  <div className="ad-author-card-profession">{articleAuthor.profession}</div>
-                )}
-              </div>
-            </div>
-          )}
 
           <div className="ad-tags">
             {article.category?.name && (

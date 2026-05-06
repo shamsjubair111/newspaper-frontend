@@ -260,6 +260,7 @@
   .cmt-form-wrapper { padding: 14px; }
   .cmt-avatar { width: 36px; height: 36px; font-size: 12px; }
 }
+
 /* ── Video Player ── */
 .ad-video-wrapper {
   position: relative;
@@ -281,6 +282,7 @@
   display: block;
   background: #000;
 }
+
 /* ── New share buttons ── */
 .ad-share-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
 .ad-share-threads   { background: #1a1a1a; }
@@ -316,9 +318,7 @@
   background: #0f2236;
   z-index: 1;
 }
-.ad-edit-header-left {
-  display: flex; align-items: center; gap: 10px;
-}
+.ad-edit-header-left { display: flex; align-items: center; gap: 10px; }
 .ad-edit-header-icon {
   width: 34px; height: 34px; border-radius: 6px;
   background: rgba(0,168,224,0.12);
@@ -380,9 +380,7 @@
 }
 .ad-edit-textarea { min-height: 240px; line-height: 1.7; }
 
-.ad-edit-divider {
-  height: 1px; background: #1e3448; margin: 2px 0;
-}
+.ad-edit-divider { height: 1px; background: #1e3448; margin: 2px 0; }
 
 .ad-edit-alert {
   padding: 10px 14px; border-radius: 5px;
@@ -440,15 +438,15 @@
   border: 1px solid #1e3448;
   border-left: 4px solid #00a8e0;
   border-radius: 6px;
-  padding: 18px 20px;
-  margin: 32px 0;
+  padding: 14px 18px;
+  margin: 0 0 20px 0;
 }
 
 .ad-author-card-left { flex-shrink: 0; }
 
 .ad-author-card-img {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #00a8e0;
@@ -456,15 +454,15 @@
 }
 
 .ad-author-card-avatar {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 18px;
   border: 2px solid #00a8e0;
 }
 
@@ -474,16 +472,8 @@
   gap: 3px;
 }
 
-.ad-author-card-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #00a8e0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
 .ad-author-card-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: #ffffff;
   font-family: 'SolaimanLipi', 'Noto Sans Bengali', Arial, sans-serif;
@@ -498,7 +488,7 @@
 }
 
 @media (max-width: 600px) {
-  .ad-author-card { padding: 14px 16px; gap: 12px; }
+  .ad-author-card { padding: 12px 14px; gap: 12px; }
   .ad-author-card-img,
-  .ad-author-card-avatar { width: 48px; height: 48px; font-size: 16px; }
+  .ad-author-card-avatar { width: 44px; height: 44px; font-size: 15px; }
 }
