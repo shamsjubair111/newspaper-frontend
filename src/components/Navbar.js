@@ -84,8 +84,14 @@ const NavigationBar = () => {
     doTranslate();
   }, [lang, categories, subcategories]);
 
-  const getCatName = (cat) => translatedCatNames[cat._id] || cat.name;
-  const getSubName = (sub) => translatedSubNames[sub._id] || sub.name;
+  const stripThe = (name) => {
+    if (!name) return name;
+    const stripped = name.toLowerCase().startsWith('the ') ? name.slice(4) : name;
+    // Normalize to title case (e.g. "ECONOMY" → "Economy")
+    return stripped.charAt(0).toUpperCase() + stripped.slice(1).toLowerCase();
+  };
+  const getCatName = (cat) => stripThe(translatedCatNames[cat._id] || cat.name);
+  const getSubName = (sub) => stripThe(translatedSubNames[sub._id] || sub.name);
 
   const getSubcategoriesForCategory = (categoryId) => {
     return subcategories.filter(sub =>
@@ -137,7 +143,8 @@ const NavigationBar = () => {
       const list = Array.isArray(data) ? data : (data.articles || []);
       const filtered = list.filter(a =>
         a.title?.toLowerCase().includes(q.toLowerCase()) ||
-        a.title?.includes(q)
+        a.title?.includes(q) ||
+        a.articleAuthor?.name?.toLowerCase().includes(q.toLowerCase())
       );
       setSearchResults(filtered.slice(0, 8));
     } catch (err) {
@@ -202,9 +209,14 @@ const NavigationBar = () => {
                   )}
                   <div className="search-result-info">
                     <p className="search-result-title">{article.title}</p>
-                    {article.category?.name && (
-                      <span className="search-result-cat">{translatedCatNames[article.category?._id] || article.category?.name}</span>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {article.category?.name && (
+                        <span className="search-result-cat">{translatedCatNames[article.category?._id] || article.category?.name}</span>
+                      )}
+                      {article.articleAuthor?.name && (
+                        <span style={{ fontSize: '11px', color: '#888' }}>✍ {article.articleAuthor.name}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

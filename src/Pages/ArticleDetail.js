@@ -444,6 +444,29 @@ const ArticleDetail = () => {
             dangerouslySetInnerHTML={{ __html: displayArticle?.content || article.content }}
           />
 
+          {/* Additional Images Gallery */}
+          {article.images && article.images.length > 0 && (
+            <div className="ad-gallery">
+              <div className="ad-gallery-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: article.images.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '12px',
+                margin: '24px 0'
+              }}>
+                {article.images.map((imgUrl, idx) => (
+                  <div key={idx} style={{ borderRadius: '6px', overflow: 'hidden', background: '#f5f5f5' }}>
+                    <img
+                      src={imgUrl}
+                      alt={`${displayArticle?.title || article.title} — ${idx + 1}`}
+                      style={{ width: '100%', height: article.images.length === 1 ? 'auto' : '220px', objectFit: 'cover', display: 'block' }}
+                      onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="ad-tags">
             {article.category?.name && (
               <Link to={`/${encodeURIComponent(article.category.name)}`} className="ad-tag">{article.category.name}</Link>

@@ -31,8 +31,15 @@ const HomePage = () => {
     });
   }, [lang, categories]);
 
+  const stripThe = (name) => {
+    if (!name) return name;
+    const stripped = name.toLowerCase().startsWith("the ")
+      ? name.slice(4)
+      : name;
+    return stripped.charAt(0).toUpperCase() + stripped.slice(1).toLowerCase();
+  };
   const getCatName = (category) =>
-    translatedCatNames[category._id] || category.name;
+    stripThe(translatedCatNames[category._id] || category.name);
 
   // Translate titles
   useEffect(() => {

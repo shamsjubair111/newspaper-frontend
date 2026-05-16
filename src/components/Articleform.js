@@ -21,6 +21,7 @@ const ArticleForm = () => {
     articleAuthor: '',
     content: '',
     thumbnail: '',
+    images: [],
     videoUrl: '',
     category: '',
     subcategory: '',
@@ -109,6 +110,21 @@ const ArticleForm = () => {
     });
   };
 
+  const handleImageAdd = () => {
+    setFormData(prev => ({ ...prev, images: [...prev.images, ''] }));
+  };
+
+  const handleImageChange = (index, value) => {
+    const updated = [...formData.images];
+    updated[index] = value;
+    setFormData(prev => ({ ...prev, images: updated }));
+  };
+
+  const handleImageRemove = (index) => {
+    const updated = formData.images.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, images: updated }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setSuccess(''); setLoading(true);
@@ -119,6 +135,7 @@ const ArticleForm = () => {
         articleAuthor: formData.articleAuthor,
         content: plainTextToHtml(formData.content),
         thumbnail: formData.thumbnail,
+        images: formData.images.filter(url => url.trim() !== ''),
         videoUrl: formData.videoUrl || '',
         category: formData.category,
         slayout: formData.slayout,
@@ -134,7 +151,7 @@ const ArticleForm = () => {
       setSuccess(`"${formData.title}" article created successfully!`);
       setFormData({
         title: '', articleAuthor: '', content: '', thumbnail: '',
-        videoUrl: '', category: '', subcategory: '', slayout: 'default'
+        images: [], videoUrl: '', category: '', subcategory: '', slayout: 'default'
       });
       fetchArticles();
     } catch (err) {
@@ -235,6 +252,41 @@ const ArticleForm = () => {
                     placeholder="https://example.com/image.jpg" disabled={loading}
                   />
                   <div className="form-text">URL of the thumbnail image for this article</div>
+                </div>
+
+                {/* Additional Images */}
+                <div className="mb-4">
+                  <label className="form-label fw-bold">
+                    Additional Images <span className="text-muted">(Optional — shown in article gallery)</span>
+                  </label>
+                  {formData.images.map((imgUrl, idx) => (
+                    <div key={idx} className="d-flex gap-2 mb-2 align-items-center">
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={imgUrl}
+                        onChange={(e) => handleImageChange(idx, e.target.value)}
+                        placeholder={`https://example.com/image-${idx + 1}.jpg`}
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => handleImageRemove(idx)}
+                        disabled={loading}
+                        title="Remove image"
+                      >✕</button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm mt-1"
+                    onClick={handleImageAdd}
+                    disabled={loading}
+                  >
+                    + Add Image
+                  </button>
+                  <div className="form-text">Add extra images that will appear as a gallery below the main content.</div>
                 </div>
 
                 {/* Video URL */}

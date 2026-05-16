@@ -1,7 +1,7 @@
 export const translations = {
   bn: {
     // Navbar
-    searchPlaceholder: 'শিরোনাম দিয়ে অনুসন্ধান করুন...',
+    searchPlaceholder: 'শিরোনাম বা লেখক দিয়ে অনুসন্ধান করুন...',
     searchLoading: 'অনুসন্ধান চলছে...',
     searchNoResult: 'কোনো ফলাফল পাওয়া যায়নি।',
     login: 'লগইন',
@@ -98,7 +98,7 @@ export const translations = {
 
   en: {
     // Navbar
-    searchPlaceholder: 'Search by title...',
+    searchPlaceholder: 'Search by title or author...',
     searchLoading: 'Searching...',
     searchNoResult: 'No results found.',
     login: 'Login',
