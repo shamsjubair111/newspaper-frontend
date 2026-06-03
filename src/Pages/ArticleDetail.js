@@ -107,6 +107,61 @@ const ArticleDetail = () => {
     } catch (err) {}
   };
 
+  // ── Distribute extra images evenly between paragraphs ──────────────────────
+  const getContentWithImages = () => {
+  const content = displayArticle?.content || article?.content || '';
+  const images = article?.images;
+
+  if (!images || images.length === 0) return content;
+
+  // Split on <br> or </p> — whichever is used as the line separator
+  const splitRegex = /(<br\s*\/?>|<\/p>)/gi;
+  const parts = content.split(splitRegex);
+
+  // Rebuild chunks: text + delimiter
+  const chunks = [];
+  for (let i = 0; i < parts.length - 1; i += 2) {
+    chunks.push((parts[i] || '') + (parts[i + 1] || ''));
+  }
+  const trailing = parts.length % 2 !== 0 ? parts[parts.length - 1] : '';
+
+  if (chunks.length === 0) return content;
+
+  // Space images evenly — skip first chunk so image never appears at the very top
+  const step = Math.max(2, Math.floor(chunks.length / (images.length + 1)));
+
+  const result = [];
+  let imageIndex = 0;
+
+  chunks.forEach((chunk, i) => {
+    result.push(chunk);
+    if (
+      imageIndex < images.length &&
+      (i + 1) % step === 0 &&
+      i < chunks.length - 1
+    ) {
+      const imgUrl = images[imageIndex++];
+      result.push(
+        `<div class="ad-inline-img-wrapper">` +
+        `<img src="${imgUrl}" alt="Article image ${imageIndex}" class="ad-inline-img" onerror="this.parentElement.style.display='none'" />` +
+        `</div>`
+      );
+    }
+  });
+
+  // Append any leftover images that didn't fit
+  while (imageIndex < images.length) {
+    const imgUrl = images[imageIndex++];
+    result.push(
+      `<div class="ad-inline-img-wrapper">` +
+      `<img src="${imgUrl}" alt="Article image ${imageIndex}" class="ad-inline-img" onerror="this.parentElement.style.display='none'" />` +
+      `</div>`
+    );
+  }
+
+  return result.join('') + trailing;
+};
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) { navigate('/login'); return; }
@@ -313,7 +368,7 @@ const ArticleDetail = () => {
           <h1 className="ad-title">{displayArticle?.title || article.title}</h1>
           <div className="ad-title-divider" />
 
-          {/* ✅ Author card — moved here, below title */}
+          {/* Author card */}
           {articleAuthor && (
             <div className="ad-author-card">
               <div className="ad-author-card-left">
@@ -334,7 +389,6 @@ const ArticleDetail = () => {
                 )}
               </div>
               <div className="ad-author-card-info">
-                {/* ✅ লেখক পরিচিতি label removed */}
                 <div className="ad-author-card-name">{articleAuthor.name}</div>
                 {articleAuthor.profession && (
                   <div className="ad-author-card-profession">{articleAuthor.profession}</div>
@@ -438,35 +492,14 @@ const ArticleDetail = () => {
             </div>
           )}
 
+          {/* Article body — extra images injected inline between paragraphs */}
           <div
             className="ad-body"
             style={{ fontSize: `${fontSize}px`, opacity: (lang === 'en' && translating) ? 0.3 : 1, transition: 'opacity 0.3s' }}
-            dangerouslySetInnerHTML={{ __html: displayArticle?.content || article.content }}
+            dangerouslySetInnerHTML={{ __html: getContentWithImages() }}
           />
 
-          {/* Additional Images Gallery */}
-          {article.images && article.images.length > 0 && (
-            <div className="ad-gallery">
-              <div className="ad-gallery-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: article.images.length === 1 ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '12px',
-                margin: '24px 0'
-              }}>
-                {article.images.map((imgUrl, idx) => (
-                  <div key={idx} style={{ borderRadius: '6px', overflow: 'hidden', background: '#f5f5f5' }}>
-                    <img
-                      src={imgUrl}
-                      alt={`${displayArticle?.title || article.title} — ${idx + 1}`}
-                      style={{ width: '100%', height: article.images.length === 1 ? 'auto' : '220px', objectFit: 'cover', display: 'block' }}
-                      onError={(e) => { e.target.parentElement.style.display = 'none'; }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+          {/* Tags */}
           <div className="ad-tags">
             {article.category?.name && (
               <Link to={`/${encodeURIComponent(article.category.name)}`} className="ad-tag">{article.category.name}</Link>

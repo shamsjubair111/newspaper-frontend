@@ -94,6 +94,20 @@
 .ad-body a { color: #00a8e0; text-decoration: none; }
 .ad-body a:hover { text-decoration: underline; }
 
+/* ── Inline Images (injected between paragraphs) ── */
+.ad-inline-img-wrapper {
+   margin: 28px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0a1a28;
+}
+
+.ad-inline-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* ── Tags ── */
 .ad-tags { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid #1e3448; margin-bottom: 0; }
 .ad-tag {
@@ -250,6 +264,7 @@
   .ad-title, .ad-body { color: #000; }
   .ad-share-icons, .ad-breadcrumb, .ad-tags, .cmt-section { display: none; }
   .ad-title { font-size: 24px; }
+  .ad-inline-img { max-height: none; }
 }
 
 /* ── Mobile ── */
@@ -259,6 +274,7 @@
   .ad-thumbnail { max-height: 220px; }
   .cmt-form-wrapper { padding: 14px; }
   .cmt-avatar { width: 36px; height: 36px; font-size: 12px; }
+  .ad-inline-img { max-height: 260px; }
 }
 
 /* ── Video Player ── */
