@@ -820,3 +820,252 @@ a:hover .hp-card-play-icon svg {
   left: 28px;
   pointer-events: none;
 }
+/* ════════════════════════════════════
+   IN FOCUS — AUTO CAROUSEL
+════════════════════════════════════ */
+
+.ifc-carousel {
+  position: relative;
+  outline: none;
+}
+
+.ifc-viewport {
+  position: relative;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.ifc-track {
+  display: flex;
+  gap: 0;
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+.ifc-slide {
+  box-sizing: border-box;
+  padding: 0 6px;
+}
+
+.ifc-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #162636;
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+}
+
+.ifc-card:hover {
+  background: #1e3248;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.ifc-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0a1520;
+}
+
+.ifc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+
+.ifc-card:hover .ifc-thumb img {
+  transform: scale(1.08);
+}
+
+.ifc-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f2236, #16324a);
+}
+
+.ifc-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0) 45%
+  );
+  transition: background 0.3s ease;
+}
+
+.ifc-card:hover .ifc-thumb-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(232, 0, 61, 0.12) 100%
+  );
+}
+
+.ifc-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  opacity: 0.92;
+}
+
+.ifc-card:hover .ifc-play-btn {
+  transform: translate(-50%, -50%) scale(1.18);
+  opacity: 1;
+}
+
+.ifc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 16px;
+  flex: 1;
+}
+
+.ifc-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #e8003d;
+}
+
+.ifc-title {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #f2f5f8;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ifc-meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8ea3b8;
+}
+
+.ifc-author {
+  position: relative;
+  padding-right: 8px;
+}
+
+.ifc-author::after {
+  content: "•";
+  position: absolute;
+  right: 0;
+  color: #55677a;
+}
+
+/* ── Nav arrows ── */
+.ifc-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(232, 0, 61, 0.92);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.85;
+}
+
+.ifc-nav:hover {
+  background: #ff1f5a;
+  transform: translateY(-50%) scale(1.08);
+  opacity: 1;
+}
+
+.ifc-nav:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.ifc-nav--prev {
+  left: -8px;
+}
+
+.ifc-nav--next {
+  right: -8px;
+}
+
+/* ── Dots ── */
+.ifc-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ifc-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #3a4d61;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease, width 0.25s ease;
+}
+
+.ifc-dot:hover {
+  background: #5a7089;
+}
+
+.ifc-dot.is-active {
+  background: #e8003d;
+  width: 22px;
+  border-radius: 5px;
+}
+
+@media (max-width: 900px) {
+  .ifc-nav {
+    width: 38px;
+    height: 38px;
+  }
+  .ifc-nav--prev {
+    left: 2px;
+  }
+  .ifc-nav--next {
+    right: 2px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ifc-title {
+    font-size: 14px;
+  }
+  .ifc-nav {
+    width: 34px;
+    height: 34px;
+    opacity: 0.9;
+  }
+}

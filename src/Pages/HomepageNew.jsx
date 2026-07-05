@@ -5,6 +5,7 @@ import { useLang } from "../context/LanguageContext";
 import { useT, translations } from "../context/translations";
 import { translateBatch } from "../context/translate";
 import CalendarSidebar from "../components/CalendarSidebar";
+import InFocusCarousel from "../components/InFocusCarousel";
 
 const HomePage = () => {
   const [articles, setArticles] = useState([]);
@@ -606,66 +607,14 @@ const HomePage = () => {
                   ▶ {t("inFocus")}
                 </span>
               </div>
-              <div className="hp-video-grid">
-                {videoArticles.slice(0, 6).map((article) => (
-                  <a
-                    key={article._id}
-                    href={`/article/${article._id}`}
-                    className="hp-video-card"
-                  >
-                    <div className="hp-video-thumb">
-                      {article.videoUrl &&
-                      article.videoUrl.includes("youtube") ? (
-                        <img
-                          src={`https://img.youtube.com/vi/${extractYouTubeId(article.videoUrl)}/hqdefault.jpg`}
-                          alt={getTitle(article)}
-                        />
-                      ) : article.thumbnail ? (
-                        <img src={article.thumbnail} alt={getTitle(article)} />
-                      ) : (
-                        <div className="hp-video-thumb-placeholder" />
-                      )}
-                      <div className="hp-video-play-btn">
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="white"
-                          width="36"
-                          height="36"
-                        >
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="12"
-                            fill="rgba(0,0,0,0.55)"
-                          />
-                          <polygon points="9.5,7 18,12 9.5,17" fill="white" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="hp-card-body">
-                      {article.category?.name && (
-                        <span className="hp-label hp-label--video">
-                          {getCatName(article.category) ||
-                            article.category.name}
-                        </span>
-                      )}
-                      <h3 className="hp-card-title hp-card-title--sm">
-                        {getTitle(article)}
-                      </h3>
-                      <div className="hp-card-meta">
-                        {article.authorName && (
-                          <span className="hp-card-author">
-                            {article.authorName}
-                          </span>
-                        )}
-                        <span className="hp-card-date">
-                          {formatDate(article.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
+              <InFocusCarousel
+                videos={videoArticles}
+                getTitle={getTitle}
+                getCatName={getCatName}
+                formatDate={formatDate}
+                extractYouTubeId={extractYouTubeId}
+                autoPlayMs={3000}
+              />
             </div>
           )}
         </div>
