@@ -5,7 +5,7 @@ import './NavigationBar.css';
 import { useLang } from '../context/LanguageContext';
 import { translateBatch } from '../context/translate';
 import { translations, useT } from '../context/translations';
-import logo from '../assets/logov1.png';
+import logo from '../assets/banner_final.png';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
