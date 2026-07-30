@@ -1,6 +1,7 @@
 import React from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ConsentBanner from './components/ConsentBanner';
@@ -52,6 +53,7 @@ function App() {
         </Routes>
         <Footer />
         <ConsentBanner />
+        <Analytics />
       </div>
     </Router>
     </LanguageProvider>
